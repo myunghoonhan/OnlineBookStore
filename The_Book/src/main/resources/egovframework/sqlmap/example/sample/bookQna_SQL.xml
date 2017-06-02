@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookQnaSpace">
+
+   <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+   <typeAlias  alias="qnaVO" type="TheBook.service.bookQnaVO"/>
+
+
+   <resultMap id="qnalist" class="TheBook.service.bookQnaVO">
+      <result property="qnaunq" column="qnaunq"/>
+      <result property="qnaid" column="qnaid"/>
+      <result property="qnapwd" column="qnapwd"/>
+      <result property="qnatitle" column="qnatitle"/>
+      <result property="qnacontent" column="qnacontent"/>
+      <result property="qnahit" column="qnahit"/>
+      <result property="qnafid" column="qnafid"/>
+      <result property="qnathread" column="qnathread"/>
+      <result property="qnaregdate" column="qnaregdate"/>
+   </resultMap>
+   
+      <resultMap id="qnaMaxThread" class="TheBook.service.bookQnaVO">
+      <result property="qnafid" column="qnafid"/>
+      <result property="qnathread" column="qnathread"/>
+   </resultMap>
+   
+ 
+ <select id="qnaDAO.selectbqnaList" parameterClass="qnaVO" resultClass="egovMap">
+       SELECT * FROM (
+         SELECT ROWNUM rn, a.* FROM (
+            SELECT * FROM bookqna
+            WHERE
+               1 = 1
+               <isNotNull property="srchTxt">
+                  <isNotEmpty property="srchTxt">
+               AND $srchCd$ LIKE '%' || #srchTxt# || '%'
+                  </isNotEmpty>
+               </isNotNull>
+            ORDER BY
+               qnafid DESC, qnathread ASC
+         ) a
+      )
+      WHERE
+         rn BETWEEN #firstIndex# + 1 AND #lastIndex#    
+   </select>
+   
+   <select id="qnaDAO.bqnaTot" resultClass="java.lang.Integer">
+      SELECT 
+         COUNT(*) tot 
+      FROM 
+         bookqna
+      WHERE
+         1 = 1
+         <isNotNull property="srchTxt">
+            <isNotEmpty property="srchTxt">
+               AND $srchCd$ LIKE '%' || #srchTxt# || '%'
+            </isNotEmpty>
+         </isNotNull>
+   </select>
+ 
+  <select id="qnaDAO.selectqna" parameterClass="String" resultMap="qnalist">
+     select * from bookqna where qnaunq=#qnaunq#
+  </select>
+  
+     <update id="qnaDAO.updateQnaHit">
+      UPDATE bookqna SET qnahit = qnahit + 1 WHERE qnaunq = #qnaunq#
+   </update>
+   
+   <select id="qnaDAO.selectQnaThreadCnt" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+      SELECT count(*)
+      FROM
+         bookqna
+      WHERE
+         qnafid = (SELECT qnafid FROM bookqna WHERE qnaunq = #qnaunq#)
+         AND
+         qnathread LIKE (SELECT qnathread FROM bookqna WHERE qnaunq = #qnaunq#) || '%'   
+   </select>
+   
+   <update id="qnaDAO.updateQnaClear" parameterClass="java.lang.String">
+      UPDATE
+         bookqna
+      SET
+         qnatitle = '삭제된 게시물입니다.', 
+         qnacontent = ''
+      WHERE
+         qnaunq = #qnaunq#
+   </update>
+   
+   <delete id="qnaDAO.deleteQna" parameterClass="qnaVO">
+      DELETE FROM
+         bookqna
+      WHERE
+         qnaunq = #qnaunq#
+   </delete>
+   
+   <update id="qnaDAO.updateQna" parameterClass="qnaVO">
+      UPDATE
+         bookqna
+      SET
+         qnatitle = #qnatitle#,
+         qnacontent = #qnacontent#,
+         qnaregdate = sysdate
+      WHERE
+         qnaunq = #qnaunq#   
+   </update>
+   
+   <insert id="qnaDAO.insertQna">
+         INSERT INTO bookqna ( qnaunq, qnaid, qnapwd, qnatitle, qnacontent, qnahit, qnafid, qnathread, qnaregdate )
+         VALUES ( #qnaunq#, #qnaid#, #qnapwd#, #qnatitle#, #qnacontent#, 0, (select nvl2(max(qnafid),max(qnafid),0)+1 from bookqna),'a', sysdate )
+
+   </insert>
+
+   <select id="qnaDAO.selectQnaMaxThread" parameterClass="java.lang.String" resultMap="qnaMaxThread">
+      SELECT
+         qnafid,
+         (SELECT max(qnathread) FROM bookqna
+          WHERE qnafid = (SELECT qnafid FROM bookqna WHERE qnaunq = #qnaunq#)
+          AND qnathread LIKE (SELECT qnathread FROM bookqna WHERE qnaunq = #qnaunq#) || '_') AS qnathread
+      FROM
+         bookqna
+      WHERE qnaunq = #qnaunq#
+   </select>
+   
+   <select id="qnaDAO.selectQnaDetail" resultMap="qnalist">
+     select * from bookqna where qnaunq=#qnaunq#
+    </select>
+   
+   <insert id="qnaDAO.insertQnaReply" parameterClass="qnaVO">
+         INSERT INTO bookqna ( qnaunq, qnaid, qnapwd, qnatitle, qnacontent, qnahit, qnafid, qnathread, qnaregdate )
+            VALUES ( #qnaunq#, #qnaid#, #qnapwd#, #qnatitle#, #qnacontent#, #qnahit#, #qnafid#, #qnathread#, sysdate )
+   </insert>
+   
+   <select id="qnaDAO.bookQnaPwdCheck" parameterClass="qnaVO" resultClass="java.lang.Integer">
+   		select count(*) from bookqna where qnapwd = #qnapwd# and qnaunq = #qnaunq#
+   </select>
+
+</sqlMap>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookMyPageSpace">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="bookMemberVO" type="TheBook.service.bookMemberVO"/>
+	<typeAlias  alias="bookBuyDetailVO" type="TheBook.service.bookBuyDetailVO"/>
+	<typeAlias  alias="bookBuyVO" type="TheBook.service.bookBuyVO"/>
+	<typeAlias  alias="bookStockVO" type="TheBook.service.bookStockVO"/>
+	<typeAlias  alias="bookVO" type="TheBook.service.bookVO"/>
+	<typeAlias  alias="baguniVO" type="TheBook.service.bookBaguniVO"/>
+	<typeAlias  alias="bookRebookVO" type="TheBook.service.bookRebookVO"/>
+	
+	<resultMap id="bookMemberList" class="TheBook.service.bookMemberVO">
+		<result property="memid" column="memid" />
+		<result property="mempwd" column="mempwd" />
+		<result property="memname" column="memname" />
+		<result property="memsex" column="memsex" />
+		<result property="membirth" column="membirth" />
+		<result property="memphone" column="memphone" />
+		<result property="mememail" column="mememail" />
+		<result property="memzip" column="memzip" />
+		<result property="memaddr1" column="memaddr1" />
+		<result property="memaddr2" column="memaddr2" />
+		<result property="memfavorite" column="memfavorite" />
+		<result property="mempoint" column="mempoint" />
+		<result property="memgrade" column="memgrade" />
+	</resultMap>
+	
+	<resultMap id="bookBuyDetailVO" class="TheBook.service.bookBuyDetailVO">
+		<result property="totBookCost" column="totBookCost" />
+		<result property="usedCash" column="usedCash" />
+		<result property="usedPoint" column="usedPoint" />
+		<result property="buydetailcnt" column="buydetailcnt" />
+	</resultMap>
+	
+	<!-- 회원정보 select -->
+    <select id="bookMyPageDAO.selectMemInfo" parameterClass="java.lang.String" resultMap="bookMemberList">
+        SELECT *
+        FROM bookmember
+        WHERE memid = #memid#
+    </select>
+	
+	<!-- 주문내역 selectList -->
+	<select id="bookMyPageDAO.selectMemBookBuy" parameterClass="bookBuyDetailVO" resultClass="egovMap">
+    	SELECT * FROM(
+			SELECT rownum rn, a.* FROM(
+		        SELECT bookbuydetail.*, bookbuy.*, to_char(bookbuy.BUYREGDATE,'yyyy-mm-dd') BUYREGDATE1
+		        FROM bookbuydetail
+		        LEFT JOIN bookbuy
+		        ON bookbuydetail.BUYDETAILBUYUNQ = bookbuy.BUYUNQ 
+		        WHERE bookbuydetail.BUYDETAILMEMID= #memid#
+		        Order By bookbuy.BUYREGDATE desc, bookbuydetail.BUYDETAILBOOKUNQ
+      		)a
+		)WHERE rn BETWEEN #firstIndex# +1 AND #lastIndex#
+	</select>
+	
+	<select id="bookMyPageDAO.selectMemBookBuyTot" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT count(*)
+		FROM bookbuydetail
+		LEFT JOIN bookbuy
+		ON bookbuydetail.BUYDETAILBUYUNQ = bookbuy.BUYUNQ 
+		WHERE bookbuydetail.BUYDETAILMEMID= #memid#
+		Order By bookbuy.BUYREGDATE desc, bookbuydetail.BUYDETAILBOOKUNQ
+	</select>
+	
+	<!-- 관심작가 selectList -->
+	<select id="bookMyPageDAO.selectMemBookAuthor" parameterClass="java.lang.String" resultClass="egovMap">
+		SELECT DISTINCT bookauthor.authorauthor, book.boimg, book.boname, book.boprice, book.bocompany, book.bopublish, book.bounq
+		FROM bookauthor
+		LEFT JOIN book 
+		ON bookauthor.authorauthor = book.boauthor where bookauthor.authorid= #memid#
+	</select>
+	
+	<select id="bookMyPageDAO.selectCntPay" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT count(*) 
+		FROM bookbuydetail
+		WHERE buydetailmemid=#memid# AND buydetailcondition='결제완료'
+	</select>
+	
+	<select id="bookMyPageDAO.selectCntPrepare" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT count(*) 
+		FROM bookbuydetail
+		WHERE buydetailmemid=#memid# AND buydetailcondition='상품준비중'
+	</select>
+	
+	<select id="bookMyPageDAO.selectCntShipping" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT count(*) 
+		FROM bookbuydetail
+		WHERE buydetailmemid=#memid# AND buydetailcondition='배송중'
+	</select>
+	
+	<select id="bookMyPageDAO.selectCntFinish" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT count(*) 
+		FROM bookbuydetail
+		WHERE buydetailmemid=#memid# AND buydetailcondition='배송완료'
+	</select>
+	
+	<!-- 문의내역  -->
+	<select id="bookMyPageDAO.selectBookQnaList" parameterClass="java.lang.String" resultClass="egovMap">
+		SELECT qnaunq, qnatitle, to_char(qnaregdate,'yyyy-mm-dd') qnaregdate, qnahit, qnacontent
+		FROM bookqna
+		WHERE qnaid=#memid#
+		ORDER BY qnaunq
+	</select>
+	
+	<!-- 나의 중고도서  -->
+	<select id="bookMyPageDAO.selectReBookList" parameterClass="java.lang.String" resultClass="egovMap">
+		select rebook.*, book.*, to_char(rebook.reboregdate,'yyyy-mm-dd') reboregdate1
+		from rebook
+		left join book
+		on rebook.rebobookunq = book.bounq
+		where rebook.reboid= #memid#
+		order by rebook.reboregdate
+	</select>
+	
+	<!-- 비밀번호 재확인 -->
+	<select id="bookMyPageDAO.selectReMemInfo" parameterClass="bookMemberVO" resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM bookmember
+		WHERE memid=#memid# AND mempwd=#mempwd#
+	</select>
+	
+	<!-- 회원정보수정 -->
+	<update id="bookMyPageDAO.updateMemModify" parameterClass="bookMemberVO">
+		UPDATE bookmember
+		SET mempwd=#mempwd#
+			,memphone=#memphone#
+			,mememail=#mememail#
+			,memzip=#memzip#
+			,memaddr1=#memaddr1#
+			,memaddr2=#memaddr2#
+			,memfavorite=#memfavorite#
+		WHERE memid=#memid#
+	</update>
+	
+	<!-- 회원탈퇴 -->
+	<update id="bookMyPageDAO.deleteMemModify" parameterClass="bookMemberVO">
+		DELETE
+		FROM bookmember
+		WHERE memid=#memid# AND mempwd=#mempwd#
+	</update>
+	
+	<!-- 구매한 도서정보 불러오기 -->
+	<select id="bookMyPageDAO.selectBookBuyDetail" parameterClass="bookBuyDetailVO" resultClass="bookBuyDetailVO">
+		select * 
+		from bookbuydetail 
+		where buydetailbuyunq = #buydetailbuyunq# and buydetailbookunq = #buydetailbookunq#
+	</select>
+	
+	<!-- 구매확정 : 포인트 적립, 등급 업데이트 -->
+	<update id="bookMyPageDAO.updateBookMemberPointPlus" parameterClass="bookMemberVO">
+		update bookmember 
+		set mempoint = mempoint + #updatepoint#, memgrade = #memgrade#
+		where memid = #memid#
+	</update>
+	
+	<!-- 구매확정 : 구매금액 확인 -->
+	<select id="bookMyPageDAO.selectBookMemberGrade" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		select nvl(sum(buydetailtotalprice), 0) 
+		from bookbuydetail 
+		where buydetailmemid = #memid# and buydetailcondition = '구매확정'
+	</select>
+	
+	<!-- 구매확정 : 구매한 중고도서 삭제 -->
+	<delete id="bookMyPageDAO.deleteRebook" parameterClass="java.lang.String">
+		delete from
+			rebook
+		where rebounq = #buydetailbookunq#
+	</delete>
+	
+	<!-- 구매확정 : 장바구니에 구매한 중고도서가 담겨있다면 삭제 -->
+	<delete id="bookMyPageDAO.deleteBookBaguni" parameterClass="java.lang.String">
+		delete from
+			bookbaguni
+		where bagunirebounq = #buydetailbookunq#
+	</delete>
+	
+	<!-- 구매확정 : 판매량 변경 -->
+	<update id="bookMyPageDAO.updateBookBototal" parameterClass="bookBuyDetailVO">
+		update book
+		set bototal = bototal + #buydetailcnt#
+		where bounq = #buydetailbookunq#
+	</update>
+	
+	<!-- 구매확정 : 배송상태 변경 -->
+	<update id="bookMyPageDAO.updateBookBuyDetailCondition" parameterClass="bookBuyDetailVO">
+		update bookbuydetail
+		set buydetailcondition = '구매확정'
+		where buydetailbuyunq = #buydetailbuyunq# and buydetailbookunq = #buydetailbookunq#
+	</update>
+	
+	
+	
+	<!-- 구매취소 : 책 하나당 가격합계, 사용한현금, 사용한 적립금 -->
+	<select id="bookMyPageDAO.selectSumCashPoint" parameterClass="bookBuyDetailVO" resultClass="bookBuyDetailVO">
+		SELECT bookbuydetail.buydetailprice*bookbuydetail.buydetailcnt AS totBookCost
+				, bookbuy.buycash AS usedCash
+				, bookbuy.buypoint AS usedPoint
+				, bookbuydetail.buydetailcnt
+		FROM bookbuydetail
+		LEFT JOIN bookbuy
+		ON bookbuydetail.buydetailbuyunq = bookbuy.buyunq
+		where bookbuydetail.BUYDETAILBUYUNQ=#buydetailbuyunq# AND bookbuydetail.BUYDETAILBOOKUNQ=#buydetailbookunq#
+	</select>
+	
+	<!-- 구매취소 : 합계>현금, 합계<현금  사용한현금, 사용한 적립금 업데이트 -->
+	<update id="bookMyPageDAO.updateCashPoint" parameterClass="bookBuyVO">
+		UPDATE bookbuy
+		SET buycash = #buycash#
+			,buypoint = #buypoint#
+		WHERE buyunq = #buyunq#
+	</update>
+	
+	<!-- 구매취소 : 합계>현금 회원정보 포인트 -->
+	<update id="bookMyPageDAO.updateMemPoint" parameterClass="bookMemberVO">
+		UPDATE bookmember
+		SET mempoint = mempoint + #gap#
+		WHERE memid = #memid#
+	</update>
+	
+	<!-- 구매취소 : 중고책 재고수량 업데이트 -->
+	<update id="bookMyPageDAO.updateRebookStock" parameterClass="java.lang.String">
+		UPDATE rebook
+		SET rebostock = '1'
+		WHERE rebounq = #rebounq#
+	</update>
+	
+	<!-- 구매취소 : 새책  판매량 업데이트 -->
+	<!-- 
+	<update id="bookMyPageDAO.updateBookBoTotal" parameterClass="bookVO">
+		UPDATE book
+		SET bototal = bototal - #bototal#
+		WHERE bounq = #bounq#
+	</update>
+	 -->
+	
+	<!-- 구매취소 : 새책  재고수량 업데이트 -->
+	<update id="bookMyPageDAO.updateBookStock" parameterClass="bookVO">
+		UPDATE bookstock
+		SET stockstock = stockstock + #bototal#
+		WHERE stockbook = #bounq# AND stockstoreunq ='1'
+	</update>
+	
+	<!-- 구매취소 : bookbuydetail 업데이트 -->
+	<update id="bookMyPageDAO.updateBookDetail" parameterClass="bookBuyDetailVO">
+		UPDATE bookbuydetail
+		SET buydetailcnt = 0, buydetailtotalprice = 0, buydetailcondition= '취소신청중'
+		WHERE bookbuydetail.BUYDETAILBUYUNQ=#buydetailbuyunq# AND bookbuydetail.BUYDETAILBOOKUNQ=#buydetailbookunq#
+	</update>
+	
+	<!-- 나의중고도서 수정 : bookReBookBaguni 업데이트 -->
+	<update id="bookMyPageDAO.UpdateReBookBaguni" parameterClass="baguniVO">
+		UPDATE bookbaguni
+		SET baguniprice = #baguniprice#
+		WHERE bagunirebounq = #bagunirebounq#
+	</update>
+	
+	<!-- 나의중고도서 수정 : ReBook 업데이트 -->
+	<update id="bookMyPageDAO.UpdateReBook" parameterClass="bookRebookVO">
+		UPDATE rebook
+		SET reboprice = #reboprice#
+		WHERE rebounq = #rebounq# AND reboid = #reboid#
+	</update>
+	
+	<!-- 나의중고도서 삭제 : bookReBookBaguni 업데이트 -->
+	<delete id="bookMyPageDAO.DeleteReBookBaguni" parameterClass="java.lang.String">
+		delete from	bookbaguni
+		where BAGUNIREBOUNQ = #BAGUNIREBOUNQ#
+	</delete>
+	
+	<!-- 나의중고도서 삭제 : ReBook 업데이트 -->
+	<delete id="bookMyPageDAO.DeleteReBook" parameterClass="bookRebookVO">
+		delete from	rebook
+		where rebounq = #rebounq# AND reboid = #reboid#
+	</delete>
+	
+</sqlMap>

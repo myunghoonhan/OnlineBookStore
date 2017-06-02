@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+	<context:component-scan base-package="egovframework,TheBook">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Service" />
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Repository" />
+	</context:component-scan>
+
+	<!-- For Json -->
+
+	<mvc:annotation-driven />
+	<context:annotation-config />
+	<bean
+		class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"
+		id="jsonView" />
+	<bean class="org.springframework.web.servlet.view.BeanNameViewResolver"
+		id="beanNameViewResolver" p:order="1" />
+	<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver"
+		p:order="2" p:viewClass="org.springframework.web.servlet.view.JstlView"
+		p:suffix=".jsp" p:prefix="/WEB-INF/jsp/TheBook/" />
+
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="webBindingInitializer">
+			<bean class="egovframework.example.cmmn.web.EgovBindingInitializer" />
+		</property>
+	</bean>
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="localeChangeInterceptor" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+	<!-- 쿠키를 이용한 Locale 이용시 <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/> -->
+	<bean id="localeChangeInterceptor"
+		class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+		<property name="paramName" value="language" />
+	</bean>
+
+	<bean
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="defaultErrorView" value="cmmn/egovError" />
+		<property name="exceptionMappings">
+			<props>
+				<prop key="org.springframework.dao.DataAccessException">cmmn/dataAccessFailure</prop>
+				<prop key="org.springframework.transaction.TransactionException">cmmn/transactionFailure</prop>
+				<prop key="egovframework.rte.fdl.cmmn.exception.EgovBizException">cmmn/egovError</prop>
+				<prop key="org.springframework.security.AccessDeniedException">cmmn/egovError</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver"
+		p:order="1" p:viewClass="org.springframework.web.servlet.view.JstlView"
+		p:prefix="/WEB-INF/jsp/" p:suffix=".jsp" />
+
+    <bean id="spring.RegularCommonsMultipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="100000000" />
+		<property name="maxInMemorySize" value="100000000" />
+	</bean>
+	<alias name="spring.RegularCommonsMultipartResolver" alias="multipartResolver"/>
+
+	<!-- For Pagination Tag -->
+	<bean id="imageRenderer"
+		class="egovframework.example.cmmn.web.EgovImgPaginationRenderer" />
+
+	<bean id="paginationManager"
+		class="egovframework.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
+		<property name="rendererType">
+			<map>
+				<entry key="image" value-ref="imageRenderer" />
+			</map>
+		</property>
+	</bean>
+	<!-- /For Pagination Tag -->
+
+	<mvc:view-controller path="/cmmn/validator.do"
+		view-name="cmmn/validator" />
+		
+		<mvc:annotation-driven/>
+
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<!--한명훈  -->
+			<mvc:mapping path="/bookMyPage.do"/>
+			<mvc:mapping path="/bookMyPageContents.do"/>
+			<mvc:mapping path="/bookMyPageMember.do"/>
+			<mvc:mapping path="/bookMemberCheck.do"/>
+			<mvc:mapping path="/bookShowMemberForm.do"/>
+			<mvc:mapping path="/bookMemModify.do"/>
+			<mvc:mapping path="/bookMemberDelete.do"/>
+			<mvc:mapping path="/finalBuy.do"/>
+			<mvc:mapping path="/requestCancel.do"/>
+			<mvc:mapping path="/OpenUpdateReBook.do"/>
+			<mvc:mapping path="/UpdateReBook.do"/>
+			<mvc:mapping path="/DeleteReBook.do"/>
+			<!--심수민  -->
+			<mvc:mapping path="/baguni.do"/>
+			<mvc:mapping path="/baguniTotalChange.do"/>
+			<mvc:mapping path="/baguniDel.do"/>
+			<mvc:mapping path="/baguniCheckStock.do"/>
+			<mvc:mapping path="/baguniCnt.do"/>
+			<mvc:mapping path="/buy.do"/>
+			<mvc:mapping path="/buyNow.do"/>
+			<!--박수영 -->
+			<mvc:mapping path="/authorAdd.do"/>
+			<mvc:mapping path="/bookReview.do"/>
+			<mvc:mapping path="/baguniAdd.do"/>
+			<mvc:mapping path="/rebookAdd.do"/>
+			<!--이소라 -->
+			<mvc:mapping path="/bookManagerOrder.do"/>
+			<mvc:mapping path="/bookMgcdupdate.do"/>
+			<mvc:mapping path="/bookManagerQnA.do"/>
+			<mvc:mapping path="/bookQnAupdate.do"/>
+			<mvc:mapping path="/bookQnAdelete.do"/>
+			<mvc:mapping path="/bookAddNoticeform.do"/>
+			<mvc:mapping path="/bookAddNotice.do"/>
+			<mvc:mapping path="/bookManagerNotice.do"/>
+			<mvc:mapping path="/bookNoticesearch.do"/>
+			<mvc:mapping path="/bookModifyform.do"/>
+			<mvc:mapping path="/booknotiModify.do"/>
+			<mvc:mapping path="/booknotiDelete.do"/>
+			<mvc:mapping path="/bookAddstorenotform.do"/>
+			<mvc:mapping path="/bookAddstnotice.do"/>
+			<mvc:mapping path="/bookMangerStore.do"/>
+			<mvc:mapping path="/bookstModifyform.do"/>
+			<mvc:mapping path="/bookstModify.do"/>
+			<mvc:mapping path="/bookstnotiDelete.do"/>
+			<mvc:mapping path="/bookList.do"/>
+			<mvc:mapping path="/bookDelete.do"/>
+			<mvc:mapping path="/bookAddform.do"/>
+			<mvc:mapping path="/nbookInsert.do"/>
+			<mvc:mapping path="/bookinfoform.do"/>
+			<mvc:mapping path="/bookinfoModify.do"/>
+			<mvc:mapping path="/bookinfoform.do"/>
+			<mvc:mapping path="/bookselectTest.do"/>
+			<mvc:mapping path="/bookManagerheader.do"/>
+			<mvc:mapping path="/managerStockList.do"/>
+			<mvc:mapping path="/managerStockOrder.do"/>
+			<mvc:mapping path="/managerStockOrderInsert.do"/>
+			<mvc:mapping path="/managerStockOrderList.do"/>
+			<mvc:mapping path="/managerStockOrderCheck.do"/>
+			<mvc:mapping path="/managerStockOrderCheckSend.do"/>
+			<mvc:mapping path="/managerTotalPrice.do"/>
+			
+			<!--조현주 -->
+			
+			<bean class="TheBook.web.LoginCheckIntercepter"/><!-- controller 실행 전이나 후에 실행 될 intercepter 로직 class -->
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+</beans>

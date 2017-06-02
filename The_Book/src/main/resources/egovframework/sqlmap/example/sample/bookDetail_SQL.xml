@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookDetail">
+
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<typeAlias alias="bookVO" type="TheBook.service.bookVO" />
+	<typeAlias alias="bookStockVO" type="TheBook.service.bookStockVO" />
+	<typeAlias alias="bookAuthorVO" type="TheBook.service.bookAuthorVO" />
+	<typeAlias alias="bookReviewVO" type="TheBook.service.bookReviewVO" />
+	<typeAlias alias="bookMemberVO" type="TheBook.service.bookMemberVO" />
+	<typeAlias alias="bookLevelVO" type="TheBook.service.bookLevelVO" />
+	<typeAlias alias="bookRebookVO" type="TheBook.service.bookRebookVO" />
+	
+	
+	<resultMap id="bookDetailList" class="TheBook.service.bookVO">
+		<result property="bounq" column="bounq" />
+		<result property="bocode" column="bocode" />
+		<result property="boname" column="boname" />
+		<result property="boauthor" column="boauthor" />
+		<result property="botrans" column="botrans" />
+		<result property="bocompany" column="bocompany" />
+		<result property="bopublish" column="bopublish" />
+		<result property="boprice" column="boprice" />
+		<result property="boimg" column="boimg" />
+		<result property="bopreview1" column="bopreview1" />
+		<result property="bopreview2" column="bopreview2" />
+		<result property="bopreview3" column="bopreview3" />
+		<result property="bopage" column="bopage" />
+		<result property="boinfo1" column="boinfo1" />
+		<result property="boinfo2" column="boinfo2" />
+		<result property="bohit" column="bohit" />
+		<result property="bosize" column="bosize" />
+		<result property="boregdate" column="boregdate" />
+		<result property="bototal" column="bototal"/>
+	</resultMap>
+	
+	<resultMap id="bookPreview" class="TheBook.service.bookVO">
+		<result property="bopreview1" column="bopreview1" />
+		<result property="bopreview2" column="bopreview2" />
+		<result property="bopreview3" column="bopreview3" />
+	</resultMap>
+	
+	<resultMap id="bookStockOrderDay" class="TheBook.service.bookStockVO">
+		<result property="stockstock" column="stockstock" />
+		<result property="day1" column="day1" />
+		<result property="day2" column="day2" />
+	</resultMap>
+	
+	<resultMap id="bookMemberInfo" class="TheBook.service.bookMemberVO">
+		<result property="memid" column="memid" />
+		<result property="memgrade" column="memgrade" />
+	</resultMap>
+	
+	<resultMap id="daejungso" class="TheBook.service.bookLevelVO">
+		<result property="dae" column="dae" />
+		<result property="jung" column="jung" />
+		<result property="so" column="so" />
+	</resultMap>
+	
+	<resultMap id="rebookVO" class="TheBook.service.bookRebookVO">
+		<result property="bounq" column="bounq" />
+		<result property="recnt" column="recnt" />
+	</resultMap>
+	
+	
+	<select id="bookDetailDAO.bookPreview" parameterClass="java.lang.String" resultMap="bookPreview">
+		select * from book where bounq=#bounq#
+	</select>
+	<select id="bookDetailDAO.levelcode" parameterClass="java.lang.String" resultClass="java.lang.String">
+		select bocode from book where bounq=#bounq#
+	</select>
+	<select id="bookDetailDAO.daejungso" parameterClass="java.lang.String" resultMap="daejungso">
+		 select 
+                (select levelname from booklevel where levelcode = substr(#levelcode#,1,2)|| '0000') dae, 
+                (select levelname from booklevel where levelcode = substr(#levelcode#,1,4)|| '00') jung, 
+                levelname so
+             from 
+                booklevel 
+             where levelcode = #levelcode#
+	</select>
+	
+	<select id="bookDetailDAO.bookStockOrderDay" parameterClass="java.lang.String" resultMap="bookStockOrderDay">
+		select stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 from bookstock 
+			   			where stockbook=#bounq# and stockstoreunq = 1
+	</select>
+	
+	<select id="bookDetailDAO.bookMemberInfo" parameterClass="java.lang.String" resultMap="bookMemberInfo">
+		select memid ,
+			   memgrade
+			   from bookmember
+			   		where memid= #id#
+	</select>
+	
+	<select id="bookDetailDAO.detailRebook" parameterClass="java.lang.String" resultMap="rebookVO">
+	 select sum(rebobookunq) recnt,bounq from    
+                (select case when rebobookunq is not null then 1 else 0 end rebobookunq,bounq  from rebook right outer join book on rebobookunq = bounq)
+                where bounq = #bounq# group by bounq  
+	</select>
+	
+	
+	
+	<select id="bookDetailDAO.bookDetail" parameterClass="java.lang.String" resultMap="bookDetailList">
+		select * from book where bounq=#bounq#
+	</select>
+	
+	<select id="bookDetailDAO.bookStoreStock" parameterClass="java.lang.String" resultClass="egovMap">
+		select storename, stockstock from bookstore, bookstock where storeunq = stockstoreunq and stockbook = #bounq#
+	</select>
+	
+	<select id="bookDetailDAO.bookReviewList" parameterClass="java.lang.String" resultClass="egovMap">
+         	select memname, bookreview.* from bookreview , bookmember  
+			where memid = reviewid and reviewbookunq = #bounq#
+	</select>
+	
+	<select id="bookDetailDAO.reviewStar" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+	select nvl(sum(reviewstar),0) from bookreview
+        	 where reviewbookunq = #bounq#
+	</select>
+	
+	<select id="bookDetailDAO.reviewTotal" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+			select count(reviewbookunq) cnt from bookreview where reviewbookunq = #bounq#
+	</select>
+	
+	
+
+	<update id="bookDetailDAO.bookDetailUdatehit" parameterClass="java.lang.String">
+			UPDATE book
+			SET bohit=bohit + 1
+			WHERE bounq=#bounq#
+	</update>
+	
+	<insert id="bookDetailDAO.authorAdd">
+		INSERT INTO bookauthor
+			( authorunq
+				, authorid
+				, authorauthor
+				)
+		VALUES (
+			  #authorunq#
+			, #authorid#
+			, #authorauthor#
+			)
+	</insert>
+	
+	<insert id="bookDetailDAO.bookReview">
+		INSERT INTO bookreview
+			( reviewunq
+				, reviewid
+				, reviewbookunq
+				, reviewcontent
+				, reviewstar
+				, reviewregdate
+				)
+		VALUES (
+			  #reviewunq#
+			, #reviewid#
+			, #reviewbookunq#
+			, #reviewcontent#
+			, #reviewstar#
+			, sysdate
+			)
+	</insert>
+	<select id="bookDetailDAO.jungTotal" parameterClass="java.lang.String" resultClass="java.lang.String">
+         	select levelname from booklevel where levelcode = substr(#levelcode#,1,4)|| '00'
+	</select>
+	
+	<select id="bookDetailDAO.jungTotalList" parameterClass="java.lang.String" resultClass="egovMap">
+         	select * from 
+            (select A.* , Rownum rnum from 
+                (select bounq, boimg, boname,levelname,boprice from book, booklevel
+                 where levelname = #levelname# and levelcode = substr(bocode,1,4)|| '00' order by bototal desc)A)
+         where 6>= rnum
+	</select>
+</sqlMap>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookRegisterSpace">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="bookMemberVO" type="TheBook.service.bookMemberVO"/>
+	<typeAlias  alias="bookPostVO" type="TheBook.service.bookPostVO"/>
+	
+	<resultMap id="bookPostList" class="TheBook.service.bookPostVO">
+		<result property="unq"     column="unq"/>
+		<result property="post"     column="post"/>
+		<result property="sido"     column="sido"/>
+		<result property="sigun"  column="sigun"/>
+		<result property="dong" column="dong"/>
+		<result property="ri" column="ri"/>
+		<result property="bunji" 	   column="bunji"/>
+		<result property="others" 	   column="others"/>
+	</resultMap>
+	
+	<insert id="bookRegisterDAO.insertbookMember">
+		INSERT INTO bookmember
+			( memid
+			, mempwd
+			, memname
+			, memsex
+			, membirth
+			, memphone
+			, mememail
+			, memzip
+			, memaddr1
+			, memaddr2
+			, memfavorite
+			, memgrade
+			)
+		VALUES 
+			( #memid#
+			, #mempwd#
+			, #memname#
+			, #memsex#
+			, #membirth#
+			, #memphone#
+			, #mememail#
+			, #memzip#
+			, #memaddr1#
+			, #memaddr2#
+			, #memfavorite#
+			, '일반'
+			) 
+    </insert>
+   
+    <select id="bookRegisterDAO.selectIdCheck" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+    	SELECT COUNT(memid)
+    	FROM bookmember
+    	WHERE memid=#memid#
+    </select>
+    
+    <select id="bookRegisterDAO.selectSigunList" parameterClass="java.lang.String" resultClass="egovMap">
+		select distinct sigun from bookpost where sido=#sido# order by sigun
+	</select>
+	
+	<select id="bookRegisterDAO.selectFindAddr" parameterClass="bookPostVO" resultClass="egovMap">
+		select * from bookpost 
+		where 
+			sido=#sido# AND 
+			sigun=#sigun# AND 
+			(dong LIKE '%' || #dong# || '%' OR 
+			ri LIKE '%' || #dong# || '%' OR 
+			others LIKE '%' || #dong# || '%')
+	</select>
+	
+	<select id="bookRegisterDAO.selectFindFromUnq" parameterClass="java.lang.String" resultMap="bookPostList">
+		select *
+		from bookpost
+		where 
+			unq = #unq#
+	</select>
+
+</sqlMap>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookNoticeSpace">
+
+   <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+   <typeAlias  alias="noticeVO" type="TheBook.service.bookNoticeVO"/>
+
+<!-- 
+   <resultMap id="sample" class="TheBook.service.bookBaguniVO">
+      <result property="id" column="id"/>
+      <result property="name" column="name"/>
+      <result property="description" column="description"/>
+      <result property="useYn" column="use_yn"/>
+      <result property="regUser" column="reg_user"/>
+   </resultMap>
+ -->   
+ 
+ <select id="noticeDAO.selectbnoticeList" parameterClass="noticeVO" resultClass="egovMap">
+        SELECT * FROM (
+         SELECT ROWNUM rn, a.* FROM (
+            SELECT
+               booknoticeunq,
+               booknoticetitle,
+               booknoticecontent,
+               booknoticehit,
+               to_char(booknoticeregdate,'yyyy-mm-dd') booknoticeregdate
+            FROM
+               booknotice
+            WHERE
+               1 = 1 
+            order by booknoticeregdate
+            )a)
+   </select>
+   
+<!--    <select id="noticeDAO.bnoticeTot" resultClass="java.lang.Integer">
+      SELECT 
+         COUNT(*) tot 
+      FROM 
+         reBoard
+      WHERE
+         1 = 1
+         <isNotNull property="srchTxt">
+            <isNotEmpty property="srchTxt">
+               AND $srchCd$ LIKE '%' || #srchTxt# || '%'
+            </isNotEmpty>
+         </isNotNull>
+   </select> -->
+ 
+
+
+</sqlMap>

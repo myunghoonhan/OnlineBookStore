@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookManagerSpace3">
+
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<typeAlias alias="bookStockVO" type="TheBook.service.bookStockVO" />
+	<typeAlias alias="bookStoreOrderVO" type="TheBook.service.bookStoreOrderVO" />
+	
+	
+	<!-- 영업점별 재고 확인 -->
+	<select id="managerDAO2.selectStoreOrderList" parameterClass="bookStockVO" resultClass="egovMap">
+	
+		select 
+			bounq, bocode, boname, boauthor, bocompany,
+			decode(stockstoreunq, '2', '강남점', '3', '디큐브시티 바로드림센터', '4', '수유점', '5', '잠실점') stockstoreunq,
+			stockstock
+		from 
+			book, bookstock
+		where 
+			stockbook = bounq and (stockstoreunq = $stockstoreunq$)
+			<isNotNull property="seltype">
+			<isNotEmpty property="seltype">
+				<isNotNull property="selname">
+				<isNotEmpty property="selname">
+					AND $seltype$ LIKE '%' || #selname# || '%'
+				</isNotEmpty>
+				</isNotNull>
+			</isNotEmpty>
+			</isNotNull>
+		order by
+			stockstock asc
+	</select>
+	
+	<!-- 발주 요청 -->
+	<insert id="managerDAO2.insertStoreOrder" parameterClass="bookStoreOrderVO">
+		insert into bookstoreorder
+		values(#storeorderstoreunq#, #storeorderbounq#, #storeorderstock#, '2', #storeorderunq#)
+	</insert>
+	
+	<select id="managerDAO2.selectStoreOrderedList" parameterClass="bookStoreOrderVO" resultClass="egovMap">
+		select 
+			decode(storeorderstoreunq, '2', '강남점', '3', '디큐브시티 바로드림센터', '4', '수유점', '5', '잠실점') storeorderstoreunq, 
+			decode(storeordercheck, '2', '미확인', '1', '확인') storeordercheck, storeorderbounq, storeorderstock, storeorderunq, 
+			bocode, boname, boauthor, bocompany
+		from 
+			book, bookstoreorder
+		where 
+			storeorderbounq = bounq and (storeorderstoreunq = $storeorderstoreunq$)
+			<isNotNull property="seltype">
+			<isNotEmpty property="seltype">
+				<isNotNull property="selname">
+				<isNotEmpty property="selname">
+					AND $seltype$ LIKE '%' || #selname# || '%'
+				</isNotEmpty>
+				</isNotNull>
+			</isNotEmpty>
+			</isNotNull>
+		order by
+			storeordercheck asc, storeorderunq asc
+	</select>
+	
+	<select id="managerDAO2.selectStoreOrderCheck" parameterClass="bookStoreOrderVO" resultClass="egovMap">
+		select 
+			decode(storeorderstoreunq, '2', '강남점', '3', '디큐브시티 바로드림센터', '4', '수유점', '5', '잠실점') storeorderstoreunq, 
+			decode(storeordercheck, '2', '미확인', '1', '확인') storeordercheck, storeorderbounq, storeorderstock, storeorderunq, 
+			bocode, boname, boauthor, bocompany, stockstock
+		from 
+			book, bookstoreorder, bookstock
+		where 
+			stockstoreunq = '1' and stockbook = storeorderbounq and
+			storeorderbounq = bounq and (storeorderstoreunq = $storeorderstoreunq$)
+			<isNotNull property="seltype">
+			<isNotEmpty property="seltype">
+				<isNotNull property="selname">
+				<isNotEmpty property="selname">
+					AND $seltype$ LIKE '%' || #selname# || '%'
+				</isNotEmpty>
+				</isNotNull>
+			</isNotEmpty>
+			</isNotNull>
+			
+			<isNotNull property="storeordercheck">
+			<isNotEmpty property="storeordercheck">
+				AND (storeordercheck = $storeordercheck$)
+			</isNotEmpty>
+			</isNotNull>
+		order by
+			storeordercheck asc, storeorderunq asc
+	</select>
+	
+	<!-- 본사 발주요청 수리 -->
+	<update id="managerDAO2.updateStoreOrderCheck" parameterClass="bookStoreOrderVO">
+		update bookstoreorder set storeordercheck = '1' where storeorderunq = #storeorderunq#
+	</update>
+
+	<select id="managerDAO2.selectStoreTotalPrice" resultClass="egovMap">
+		select 
+			sum(buydetailprice) totalprice, buydetailcondition 
+		from 
+			bookbuydetail 
+		group by 
+			buydetailcondition
+	</select>
+
+</sqlMap>

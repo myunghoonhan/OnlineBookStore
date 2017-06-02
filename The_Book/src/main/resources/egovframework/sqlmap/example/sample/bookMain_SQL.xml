@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="mainBook">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+	<typeAlias  alias="bookVO" type="TheBook.service.bookVO"/>
+	<typeAlias  alias="bookMemberVO" type="TheBook.service.bookMemberVO"/>
+	<typeAlias  alias="bookLevelVO" type="TheBook.service.bookLevelVO"/>
+	<typeAlias  alias="bookRebookVO" type="TheBook.service.bookRebookVO"/>
+	<typeAlias  alias="bookbaguniVO" type="TheBook.service.bookbaguniVO"/>
+
+	<resultMap id="sample" class="egovframework.example.sample.service.SampleVO">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="description" column="description"/>
+		<result property="useYn" column="use_yn"/>
+		<result property="regUser" column="reg_user"/>
+	</resultMap>
+	
+	<select id="bookMainDAO.highPriceList" parameterClass="bookVO" resultClass="egovMap">
+		select * from
+		(select A.* , 
+				Rownum rnum from
+			(select bounq, 
+					boimg,
+					boname,
+					levelname,
+					boprice 
+						from book,
+							 booklevel 
+							 	where levelcode like substr(bocode,1,4) || 0  || 0 
+		order by bototal desc)A) where 4 >= rnum
+	</select>
+	
+	<select id="bookMainDAO.selectUpdate" parameterClass="bookVO" resultClass="egovMap">
+		select * from
+		(select A.* , Rownum rnum from
+		(select bounq, boimg, boname,levelname,boprice from book, booklevel where levelcode like substr(bocode,1,4) || 0  || 0 
+		order by boregdate desc)A) where 4 >= rnum
+	</select>
+	
+	<select id="bookMainDAO.selectfavorite" parameterClass="java.lang.String" resultClass="java.lang.String">
+		select memfavorite from bookmember where memid=#id#
+	</select>
+	
+	<select id="bookMainDAO.favoriteBookList" parameterClass="java.lang.String" resultClass="egovMap">
+		select * from
+		(select A.* , Rownum rnum from
+		(select bounq, boimg, boname, levelname, boprice from book a , booklevel b where  a.bocode = b.levelcode and b.levelname = #favorite#
+		order by bohit desc)A) where 4 >= rnum
+	</select>
+	
+	<select id="bookMainDAO.nullfavoriteList" parameterClass="bookVO" resultClass="egovMap">
+		select * from
+		(select A.* , Rownum rnum from
+		(select bounq, boimg, boname,levelname ,boprice from book, booklevel where levelcode like substr(bocode,1,4) || '00'
+		order by bohit desc)A) where 4 >= rnum
+	</select>
+	
+	<select id="bookMainDAO.guknae" parameterClass="java.lang.String" resultClass="egovMap">
+				select levelname, levelcode 
+					from booklevel 
+						where levelcode like #levelcode# || '%' || '00' and levelcode > 100000 
+	</select>
+	
+	<select id="bookMainDAO.soList" parameterClass="bookLevelVO" resultClass="egovMap">
+				select levelname, levelcode
+					from booklevel 
+						where levelcode like #dae# || #jung# || '%' and levelcode > #dae# || #jung# || '00'
+	</select>
+<select id="bookMainDAO.soname"  parameterClass="java.lang.String" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))	natural join
+	(select 
+            bounq,
+            boname,
+            bocompany, 
+            bocode, 
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish, 
+            boprice, 
+            boregdate, 
+            levelname,  
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and stockstoreunq='1' and levelcode = #levelcode#)
+	</select>
+	<select id="bookMainDAO.tagRegDateList" parameterClass="java.lang.String" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and stockstoreunq='1' and levelcode = #levelcode#) order by boregdate desc
+	</select>
+	
+		<select id="bookMainDAO.tagLowPriceList" parameterClass="java.lang.String" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and stockstoreunq='1' and levelcode = #levelcode#) order by boprice
+	</select>
+	
+			<select id="bookMainDAO.tagHighPriceList" parameterClass="java.lang.String" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and stockstoreunq='1' and levelcode = #levelcode#) order by boprice desc
+	</select>
+				<select id="bookMainDAO.tagReviewList" parameterClass="java.lang.String" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and stockstoreunq='1' and levelcode = #levelcode#) order by cnt desc
+	</select>
+	
+<select id="bookMainDAO.tagHitList" parameterClass="java.lang.String" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt, bounq ,a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and stockstoreunq='1' and levelcode = #levelcode#) order by bohit desc
+	</select>
+	
+	
+	<select id="bookMainDAO.memgrade" parameterClass="java.lang.String" resultClass="java.lang.String">
+		select memgrade from bookmember where memid=#id#
+	</select>
+	
+	<select id="bookMainDAO.bookSeachBar" parameterClass="bookVO" resultClass="egovMap">	
+	(select levelname , levelcode , count(cnt) as count from
+		(select 
+			a.levelname , 
+			a.levelcode , 
+			cnt 
+        from booklevel a, 
+			(select 
+                    c.levelcode, 
+                    c.levelname,
+                    (select count(*) from book s where substr(s.bocode,1,4) = substr(c.levelcode,1,4)) cnt
+               from booklevel c, book d 
+			where c.LEVELCODE = d.bocode and d.BONAME like '%'||#searchName#||'%' and c.levelcode like #searchCode#||'%') b
+			where a.levelcode like substr(b.levelcode,1,4)||'00') group by levelname, levelcode)
+	</select>
+	
+	<select id="bookMainDAO.searchTotCount" parameterClass="bookVO" resultClass="egovMap">	
+		select count(*) as count from(
+		(select 
+			a.levelname , 
+			a.levelcode , 
+			cnt 
+        from booklevel a, 
+			(select 
+                    c.levelcode, 
+                    c.levelname,
+                    (select count(*) from book s where substr(s.bocode,1,4) = substr(c.levelcode,1,4)) cnt
+               from booklevel c, book d
+			where c.LEVELCODE = d.bocode and d.BONAME like '%'||#searchName#||'%' and c.levelcode like #searchCode#||'%') b
+			where a.levelcode like substr(b.levelcode,1,4)||'00'))
+	</select>
+	
+	<select id="bookMainDAO.searchBookInfo" parameterClass="bookVO" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a 
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and BONAME like '%'||#searchName#||'%' and stockstoreunq='1' and levelcode like #searchCode#||'%')
+	</select>
+	
+	<select id="bookMainDAO.searchNewLists" parameterClass="bookVO" resultClass="egovMap">	
+		
+	select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq, a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and BONAME like '%'||#searchName#||'%' and stockstoreunq='1' and levelcode like #searchCode#||'%')
+order by boregdate desc  
+	</select>
+	
+	<select id="bookMainDAO.searchLowPriceList" parameterClass="bookVO" resultClass="egovMap">	
+		
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq, a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and BONAME like '%'||#searchName#||'%' and stockstoreunq='1' and levelcode like #searchCode#||'%')
+order by boprice  
+	</select>
+	
+	<select id="bookMainDAO.searchHighPriceList" parameterClass="bookVO" resultClass="egovMap">	
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and BONAME like '%'||#searchName#||'%' and stockstoreunq='1' and levelcode like #searchCode#||'%')
+order by boprice desc  
+	</select>
+	
+	<select id="bookMainDAO.searchHitList" parameterClass="bookVO" resultClass="egovMap">	
+		
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and BONAME like '%'||#searchName#||'%' and stockstoreunq='1' and levelcode like #searchCode#||'%')
+order by bohit desc  
+	</select>
+	<select id="bookMainDAO.searchReviewList" parameterClass="bookVO" resultClass="egovMap">
+select * from 
+    (select * from         
+        (select nvl(cnt, 0) as cnt,bounq , a as star
+            from book a left outer join
+                (select count(*) as cnt, reviewbookunq ,nvl(sum(reviewstar),0) as a
+                     from bookreview 
+                     group by reviewbookunq)  
+            on bounq = reviewbookunq) 
+         natural join 
+        (select nvl(recnt,0) as recnt,bounq  
+            from book left outer join 
+                (select count(*) as recnt,rebobookunq 
+                    from rebook 
+                    group by rebobookunq) on rebobookunq = bounq))
+natural join
+(select 
+            bounq,
+            boname,
+            bocompany,
+            bocode,
+            bohit,
+            boimg,
+            boauthor,
+            botrans,
+            bopublish,
+            boprice,
+            boregdate,
+            levelname,
+            stockstock,
+            to_char(sysdate+1,'dd') day1,
+            decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2 
+                from book ,booklevel,bookstock 
+                    where bocode=levelcode and stockbook = bounq and BONAME like '%'||#searchName#||'%' and stockstoreunq='1' and levelcode like #searchCode#||'%')
+order by cnt desc  
+    </select>
+
+	<select id="bookMainDAO.mainSearchRebook" parameterClass="bookRebookVO" resultClass="egovMap">
+ 	select 
+ 		bounq, bocode, boname, boauthor, botrans, bocompany, bopublish, boprice, boimg, bopreview1, bopreview2, bopreview3,
+ 		bopage, bosize, boinfo1, boinfo2, bohit, boregdate, bototal,
+ 		rebounq, rebobookunq, reboprice, rebocondition, reboid, to_char(reboregdate, 'yyyy-mm-dd') reboregdate, reboname, rebostock
+ 	from 
+ 		rebook , book
+    where 
+    	rebobookunq = bounq and  BONAME like '%'||#reboSearchName#||'%' and rebostock ='1'
+    order by 
+    	reboregdate desc
+    </select>
+    <select id="bookMainDAO.LowPriceRebook" parameterClass="bookRebookVO" resultClass="egovMap">
+ 	select * from rebook , book 
+                where rebobookunq = bounq and BONAME like '%'||#reboSearchName#||'%' order by reboprice
+    </select>
+    <select id="bookMainDAO.HighPriceRebook" parameterClass="bookRebookVO" resultClass="egovMap">
+ 	select * from rebook , book 
+                where rebobookunq = bounq and BONAME like '%'||#reboSearchName#||'%' order by reboprice desc
+    </select>
+ 	<select id="bookMainDAO.clickJungoList" parameterClass="java.lang.String" resultClass="egovMap">
+ 	 select * from rebook , book 
+                        where bounq = rebobookunq and rebobookunq = #rebobookunq#
+    </select>
+    
+    
+    <insert id="bookMainDAO.baguniAdd">
+		INSERT INTO bookbaguni
+			( baguniunq
+				, bagunibookunq
+				, baguniprice
+				, bagunitotal
+				, baguniid
+				, bagunirebounq
+				, bagunibookname
+				)
+		VALUES (
+			  #baguniunq#
+			, #bagunibookunq#
+			, #baguniprice#
+			, #bagunitotal#
+			, #baguniid#
+			, #bagunirebounq#
+			, #bagunibookname#
+			)
+	</insert>
+</sqlMap>

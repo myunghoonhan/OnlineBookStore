@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookBaguniSpace">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="baguniVO" type="TheBook.service.bookBaguniVO"/>
+	<typeAlias  alias="memberVO" type="TheBook.service.bookMemberVO"/>
+	<typeAlias  alias="rebookVO" type="TheBook.service.bookRebookVO"/>
+
+<!-- 
+	<resultMap id="sample" class="TheBook.service.bookBaguniVO">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="description" column="description"/>
+		<result property="useYn" column="use_yn"/>
+		<result property="regUser" column="reg_user"/>
+	</resultMap>
+ -->
+ 	
+ 	<resultMap id="stockCnt" class="TheBook.service.bookStockVO">
+		<result property="stockstock" column="stockstock"/>
+	</resultMap>
+ 
+ 	<select id="baguniDAO.selectMemberInfo" parameterClass="java.lang.String" resultClass="memberVO">
+ 		select 
+ 			memid,
+ 			memname,
+ 			mempoint,
+ 			mememail,
+ 			memphone,
+ 			memzip,
+ 			memaddr1,
+ 			memaddr2,
+ 			decode(memgrade, '일반', 1,
+                        	 '브론즈', 3,
+                        	 '실버', 5,
+                        	 '골드', 7) memgrade
+ 		from 
+ 			bookmember 
+ 		where 
+ 			memid = #memid#
+ 	</select>
+ 	
+ 	<select id="baguniDAO.selectBaguniList" parameterClass="java.lang.String" resultClass="egovMap">
+ 		select 
+ 			distinct
+ 			bounq, 
+ 			boimg, 
+ 			bagunibookname,
+ 			baguniunq,
+ 			bagunirebounq, 
+ 			baguniprice, 
+ 			bagunitotal,
+ 			rebostock,
+ 			stockstock,
+ 			to_char(sysdate+1,'dd') day1,
+ 			decode(to_char(sysdate+1,'d'), 1, '일',
+                                           2, '월',
+                                           3, '화',
+                                           4, '수',
+                                           5, '목',
+                                           6, '금',
+                                           7, '토') day2
+ 		from
+            rebook right outer join bookbaguni on bagunirebounq = rebounq
+            join book on bounq = bagunibookunq
+            join bookstock on bagunibookunq = stockbook
+ 		where
+ 			stockstoreunq = 1
+ 		and
+ 			baguniid = #memid#
+ 		order by
+ 			baguniunq desc
+ 	</select>
+ 	
+ 	<select id="baguniDAO.selectBookstockCnt" parameterClass="baguniVO" resultClass="java.lang.Integer">
+ 		select
+ 			stockstock
+ 		from
+ 			bookstock
+ 		where
+ 			stockstoreunq = 1
+ 		and
+ 			stockbook = #bagunibookunq#	
+ 	</select>
+ 	
+ 	<update id="baguniDAO.updateBaguniTotal" parameterClass="baguniVO">
+ 		update
+ 			bookbaguni
+ 		set
+ 			bagunitotal = #bagunitotal#
+ 		where
+ 			baguniunq = #baguniunq#
+ 	</update>
+ 	
+ 	<delete id="baguniDAO.deleteBaguni" parameterClass="baguniVO">
+ 		delete from
+ 			bookbaguni
+ 		where baguniunq = #baguniunq#
+ 	</delete>
+ 	
+ 	<select id="baguniDAO.selectBookstockCntList" parameterClass="java.lang.String" resultMap="stockCnt">
+ 		select
+ 			stockstock
+ 		from
+ 			bookstock
+ 		where
+ 			stockstoreunq = 1
+ 		and
+ 			stockbook = #unq#	
+ 	</select>
+ 	
+ 	<select id="baguniDAO.selectRebookstockCntList" parameterClass="java.lang.String" resultClass="rebookVO">
+ 		select
+ 			rebostock
+ 		from
+ 			rebook
+ 		where
+ 			rebounq = #unq#
+ 	</select>
+ 	
+ 	<select id="baguniDAO.selectBaguniCnt" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+ 		select 
+ 			count(*) 
+ 		from 
+ 			bookbaguni 
+ 		where 
+ 			baguniid = #memid#
+ 	</select>
+ 	
+
+</sqlMap>

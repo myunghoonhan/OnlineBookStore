@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="reBook">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias alias="bookVO" type="TheBook.service.bookVO" />
+	<typeAlias alias="bookRebookVO" type="TheBook.service.bookRebookVO"/>
+	
+
+	<select id="bookRebookDAO.bonameList" parameterClass="java.lang.String" resultClass="egovMap">
+		select boname, bounq from book where boname LIKE '%' || #boname# || '%'
+	</select>
+	
+	<insert id="bookRebookDAO.rebookInsert">
+		INSERT INTO rebook
+			(  	  rebounq
+				, rebobookunq
+				, reboprice
+				, rebocondition
+				, reboid
+				, reboregdate
+				, reboname
+				, rebostock
+				)
+		VALUES (
+			  #rebounq#
+			, #rebobookunq#
+			, #reboprice#
+			, #rebocondition#
+			, #reboid#
+			, sysdate
+			, #reboname#
+			, #rebostock#
+			)
+	</insert>
+	
+	<select id="bookRebookDAO.reboname" parameterClass="java.lang.String" resultClass="java.lang.String">
+		select boname from book where bounq = #rebobookunq#
+	</select>
+	
+	<select id="bookRebookDAO.lowPriceList" parameterClass="bookRebookVO" resultClass="egovMap">
+		select*from
+		(select A.* , 
+				Rownum rnum from
+					(select reboname, 
+							rebobookunq ,
+						    boimg ,
+						    rebocondition ,
+						    boprice , 
+						    reboprice ,
+						    rebounq 
+						   		 from rebook , book
+						     	 	  	 where rebobookunq = bounq 
+											order by reboprice)A) where 12 >=rnum 
+	</select>
+	
+	<select id="bookRebookDAO.bestList" parameterClass="bookRebookVO" resultClass="egovMap">
+		select*from
+		(select A.* , Rownum rnum from
+		(select reboname, rebobookunq , boimg , rebocondition , boprice , reboprice ,rebounq from rebook , book where rebobookunq = bounq 
+		order by bototal)A) where 12 >=rnum 
+	</select>
+</sqlMap>

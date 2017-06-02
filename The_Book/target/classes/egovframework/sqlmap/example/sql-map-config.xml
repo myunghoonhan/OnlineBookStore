@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN" "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<!--이소라 줄:5~19 -->	
+	<sqlMap resource="egovframework/sqlmap/example/sample/EgovSample_Sample_SQL.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/example/sample/bookAdmin_SQL.xml"/>
+	<sqlMap resource="egovframework/sqlmap/example/sample/bookAdmin2_SQL.xml"/>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!--End -->
+	<!--한명훈 줄:20~29 -->
+	
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookMyPage_SQL.xml"/>
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookLogin_SQL.xml"/>
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookRegister_SQL.xml"/>
+	
+		
+	
+	
+	<!--End -->
+	<!-- 박수영 줄:30~39 -->
+		
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookMain_SQL.xml"/>
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookRebook_SQL.xml"/> 
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookDetail_SQL.xml"/>
+		
+			
+		
+	
+	<!--End -->
+	<!-- 조현주 줄:40~49 -->
+		
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookStore_SQL.xml"/>
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookNotice_SQL.xml"/>	
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookQna_SQL.xml"/>
+	
+	
+		
+	
+	<!--End -->
+	<!-- 심수민 줄:50~59 -->
+	
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookBaguni_SQL.xml"/>
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookBuy_SQL.xml"/>
+		<sqlMap resource="egovframework/sqlmap/example/sample/bookManager_SQL.xml"/>
+	
+	
+	
+		
+	<!--End -->
+</sqlMapConfig>

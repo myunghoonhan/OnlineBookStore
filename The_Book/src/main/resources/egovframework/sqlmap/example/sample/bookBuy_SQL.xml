@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookBuySpace">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="buyVO" type="TheBook.service.bookBuyVO"/>
+	<typeAlias  alias="buyDetailVO" type="TheBook.service.bookBuyDetailVO"/>
+
+<!-- 
+	<resultMap id="sample" class="TheBook.service.bookBaguniVO">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="description" column="description"/>
+		<result property="useYn" column="use_yn"/>
+		<result property="regUser" column="reg_user"/>
+	</resultMap>
+ --> 	
+ 	
+ 	<select id="buyDAO.selectBuyList" parameterClass="java.lang.String" resultClass="egovMap"> 		
+ 		select
+ 			boimg,
+ 			bagunibookunq,
+ 			bagunibookname,
+ 			baguniprice,
+ 			bagunitotal,
+ 			baguniunq,
+ 			bagunirebounq
+ 		from
+ 			book,
+ 			bookbaguni
+ 			
+ 		$sqlValue$
+ 		
+ 		order by
+ 			baguniunq desc
+ 	</select>
+ 	
+ 	<insert id="buyDAO.insertBookBuy" parameterClass="buyVO">
+ 		insert into bookbuy 
+ 		values(#buyunq#,#buyid#,#buyname#,#buyphone#,#buyzip#,#buyaddr1#,#buyaddr2#,#buypoint#,#buycash#,#buydeliveryprice#,sysdate)
+ 	</insert>
+ 	
+ 	<insert id="buyDAO.insertBookBuyDetail" parameterClass="buyDetailVO">
+ 		insert into bookbuydetail
+ 		values(#buydetailbuyunq#,#buydetailbookunq#,#buydetailbookname#,#buydetailprice#,#buydetailcnt#,#buydetailtotalprice#,#buydetailbookimg#,#buydetailmemid#,'결제완료')
+ 	</insert>
+ 	
+ 	<update id="buyDAO.updateRebookStock" parameterClass="java.lang.String">
+ 		update rebook set rebostock = 0 where rebounq = #unq#
+ 	</update>
+ 	
+ 	<delete id="buyDAO.deleteBookbaguni" parameterClass="buyVO">
+ 		delete from bookbaguni where $searchtype$ = #searchname# and baguniid = #buyid#
+ 	</delete>
+ 	
+ 	<update id="buyDAO.updateBookStockCnt" parameterClass="buyDetailVO">
+ 		update bookstock set stockstock = stockstock - #buydetailcnt# where stockstoreunq = '1' and stockbook = #buydetailbookunq#
+ 	</update>
+ 	
+ 	<update id="buyDAO.updateBookmemberPoint" parameterClass="buyVO">
+ 		update bookmember set mempoint = mempoint - #buypoint# where memid = #buyid#
+ 	</update>
+ 	
+ 	<select id="buyDAO.selectBuyListBook" parameterClass="java.lang.String" resultClass="egovMap">
+ 		select
+ 			boimg, bounq as bagunibookunq, boname as bagunibookname, boprice as baguniprice 
+ 		from 
+ 			book 
+ 		where 
+ 			bounq = #bounq#
+ 	</select>
+ 	
+ 	<select id="buyDAO.selectBuyListRebook" parameterClass="java.lang.String" resultClass="egovMap">
+ 		select
+ 			boimg, rebounq as bagunibookunq, reboname as bagunibookname, reboprice as baguniprice 
+ 		from 
+ 			book, rebook
+ 		where 
+ 			rebounq = #bounq# and bounq = rebobookunq
+ 	</select>
+ 	
+ 	
+
+</sqlMap>

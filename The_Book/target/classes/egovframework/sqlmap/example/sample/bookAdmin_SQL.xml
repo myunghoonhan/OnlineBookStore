@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookManagerSpace">
+
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	
+	<typeAlias alias="bookBuyVO" type="TheBook.service.bookBuyVO" />
+	<typeAlias alias="bookQnaVO" type="TheBook.service.bookQnaVO" />
+	<typeAlias alias="bookNoticeVO" type="TheBook.service.bookNoticeVO" />
+	<typeAlias alias="bookStoreNoticeVO" type="TheBook.service.bookStoreNoticeVO" />
+	<typeAlias alias="bookStoreVO" type="TheBook.service.bookStoreVO" />
+	<typeAlias alias="bookBuyDetailVO" type="TheBook.service.bookBuyDetailVO" />
+	
+
+
+	<resultMap id="NoticeList" class="TheBook.service.bookNoticeVO">
+		<result property="booknoticeunq" column="booknoticeunq" />
+		<result property="booknoticetitle" column="booknoticetitle" />
+		<result property="booknoticecontent" column="booknoticecontent" />
+		<result property="booknoticehit" column="booknoticehit" />
+		<result property="booknoticeregdate" column="booknoticeregdate" />
+		<!-- property:VO에 있는 변수명 column:테이블 컬럼명과 동일하게 해야한다. -->
+	</resultMap>
+
+
+
+	<resultMap id="StorenotiList" class="TheBook.service.bookStoreNoticeVO">
+		<result property="storenoticeunq" column="storenoticeunq" />
+		<result property="storenoticestore" column="storenoticestore" />
+		<result property="storenoticetitle" column="storenoticetitle" />
+		<result property="storenoticecontent" column="storenoticecontent" />
+		<result property="storenoticeroom" column="storenoticeroom" />
+		<result property="storenoticeing" column="storenoticeing" />
+		<result property="storenoticeregdate" column="storenoticeregdate" />
+		<!-- property:VO에 있는 변수명 column:테이블 컬럼명과 동일하게 해야한다. -->
+	</resultMap>
+
+
+	
+
+	<!-- 배송관리 리스트 검색, 출력 -->
+	<select id="managerDAO.bookManagerOrder" parameterClass="bookBuyVO" resultClass="egovMap">
+	
+	
+		
+		SELECT 
+						BOOKBUYDETAIL.buydetailbuyunq, buyid, bookbuydetail.buydetailbookunq, 
+						BOOKBUYDETAIL.buydetailbookname,BOOKBUYDETAIL.buydetailcnt, BOOKBUYDETAIL.buydetailtotalprice, 
+						to_char(buyregdate,'yyyy-mm-dd') buyregdate, BOOKBUYDETAIL.buydetailcondition
+		
+		FROM 
+						BOOKBUY, BOOKBUYDETAIL
+		
+		WHERE 
+						BOOKBUY.buyunq = BOOKBUYDETAIL.buydetailbuyunq
+						
+						<isNotNull property="searchname"> 
+							<isNotEmpty property="searchname"> 
+								AND $searchtype$ LIKE '%' || #searchname# || '%' 
+							</isNotEmpty> 
+						</isNotNull> 
+		ORDER BY 
+						buyregdate desc 
+		
+		</select>
+
+
+
+	<!-- 배송상태 변경 -->
+	<update id="managerDAO.updateCondition" parameterClass="bookBuyDetailVO"> 
+		UPDATE 
+						bookbuydetail
+						 
+		SET 			buydetailcondition = #buydetailcondition# 
+		WHERE 		buydetailbuyunq=#buydetailbuyunq# 
+		
+	</update>
+
+
+
+	<!-- 고객 QnA 리스트, 검색 -->
+	<select id="managerDAO.bookManagerQnA" parameterClass="bookQnaVO"
+		resultClass="egovMap">
+
+		SELECT
+						qnaunq, qnaid, qnatitle, to_char(qnaregdate,'yyyy-mm-dd') qnaregdate , qnacontent
+		FROM
+						BOOKQNA
+		WHERE
+						1 = 1
+						<isNotNull property="name">
+							<isNotEmpty property="name">
+				
+								AND $search$ LIKE '%' || #name# || '%'
+							</isNotEmpty>
+						</isNotNull>
+		ORDER BY
+						qnaregdate asc
+	</select>
+
+
+	<!-- 고객 QnA 답변 -->
+	<update id="managerDAO.updateQnA" parameterClass="bookQnaVO">
+		UPDATE BOOKQNA
+		SET qnacontent = #qnacontent# , qnatitle='[답변완료] ' || #qnatitle#
+		WHERE
+		qnaunq=#qnaunq#
+	</update>
+
+
+
+
+	<!-- QnA 삭제 -->
+	<delete id="managerDAO.deleteQnA" parameterClass="bookQnaVO">
+		DELETE FROM
+							BOOKQNA
+		WHERE
+							qnaunq = #qnaunq#
+	</delete>
+
+
+
+
+	<!-- 홈페이지 공지사항 등록 -->
+	<insert id="managerDAO.insertNotice">
+
+		insert into 
+						booknotice( booknoticeunq,booknoticetitle, booknoticecontent,booknoticehit, booknoticeregdate)
+		values
+						( #booknoticeunq#,#booknoticetitle#, #booknoticecontent#,default, sysdate)
+
+	</insert>
+
+
+
+
+
+	<!-- 홈페이지 공지사항 리스트 -->
+	<select id="managerDAO.bookManagerNotice" parameterClass="bookNoticeVO" resultClass="egovMap">
+
+		SELECT
+		booknoticeunq, booknoticetitle, booknoticehit,
+		to_char(booknoticeregdate,'yyyy-mm-dd') booknoticeregdate
+		FROM
+		BOOKNOTICE
+
+		ORDER BY
+		booknoticeregdate desc
+	</select>
+
+
+
+	<!-- 홈페이지 공지사항 검색 -->
+	<select id="managerDAO.bookNoticesearch" parameterClass="bookNoticeVO" resultClass="egovMap">
+
+		SELECT
+		booknoticeunq, booknoticetitle, booknoticehit,
+		to_char(booknoticeregdate,'yyyy-mm-dd') booknoticeregdate
+		FROM
+		BOOKNOTICE
+		WHERE
+		booknoticetitle LIKE '%' || #searchname# || '%'
+
+		ORDER BY
+		booknoticeregdate desc
+	</select>
+
+
+	<select id="managerDAO.selectnoticeDetail" resultMap="NoticeList">
+		SELECT
+					 *
+		FROM
+					BOOKNOTICE
+		WHERE 	
+					booknoticeunq = #booknoticeunq#
+	</select>
+
+
+
+	<!-- 관리자 공지사항 수정 -->
+	<update id="managerDAO.modifynotice" parameterClass="bookNoticeVO">
+		UPDATE
+				BOOKNOTICE
+		SET 
+				booknoticecontent = #booknoticecontent# , booknoticetitle = #booknoticetitle#
+		WHERE
+				booknoticeunq=#booknoticeunq#
+	</update>
+
+
+	<!-- QnA 삭제 -->
+	<delete id="managerDAO.deletenotice" parameterClass="bookNoticeVO">
+		DELETE FROM
+							BOOKNOTICE
+		WHERE
+							booknoticeunq = #booknoticeunq#
+	</delete>
+
+
+
+
+	<!-- 영업점 공지사항 등록 -->
+	<insert id="managerDAO.insertstNotice">
+
+		INSERT INTO 
+			BOOKSTORENOTICE
+				(storenoticeunq, storenoticestore, storenoticetitle, storenoticecontent, storenoticeroom, storenoticeing, storenoticeregdate)
+		VALUES 
+				(#storenoticeunq#, #storenoticestore#, #storenoticetitle#,
+				 #storenoticecontent#, #storenoticeroom#, #sdate#|| '~' || #edate#, sysdate)
+	</insert>
+
+
+
+	<!-- 영업점 공지사항 리스트 -->
+	<select id="managerDAO.bookMangerStore" parameterClass="bookStoreNoticeVO" resultClass="egovMap">
+		SELECT
+		storenoticeunq, storenoticetitle, to_char(storenoticeregdate,'yyyy-mm-dd')
+		storenoticeregdate , storenoticecontent,
+		BOOKSTORE.STORENAME, storenoticeroom, storenoticeing
+		FROM
+		BOOKSTORENOTICE, BOOKSTORE
+		WHERE
+		BOOKSTORE.STOREUNQ=BOOKSTORENOTICE.storenoticestore
+		<isNotNull property="searchname">
+			<isNotEmpty property="searchname">
+				AND $selecttype$ LIKE '%' || #searchname# || '%'
+			</isNotEmpty>
+		</isNotNull>
+		ORDER BY
+		storenoticeregdate desc
+	</select>
+
+
+	<!-- 영업점 공지사항 수정폼 -->
+	<select id="managerDAO.selectstnotiDetail" resultClass="bookStoreNoticeVO">
+		SELECT
+		storenoticeunq, storenoticecontent, storenoticestore,
+		storenoticetitle, storenoticeroom,
+		substr(storenoticeing,1, 10) as sbsdate, substr(storenoticeing,12, 22) as sbedate
+		FROM
+		BOOKSTORENOTICE
+		WHERE storenoticeunq = #storenoticeunq#
+	</select>
+
+
+
+
+	<!-- 영업점 공지사항 삭제 -->
+	<delete id="managerDAO.deletestNotice" parameterClass="bookStoreNoticeVO">
+		DELETE
+		FROM
+		BOOKSTORENOTICE
+		WHERE
+		storenoticeunq = #storenoticeunq#
+	</delete>
+
+
+	<!-- 영업점 공지사항 수정 기능 -->
+	<update id="managerDAO.modifystnotice" parameterClass="bookStoreNoticeVO">
+		UPDATE
+					BOOKSTORENOTICE
+		SET 
+					storenoticecontent = #storenoticecontent# , storenoticestore=#storenoticestore#,
+					storenoticetitle = #storenoticetitle#, storenoticeroom = #storenoticeroom#,
+					storenoticeing = #sdate#|| '~' || #edate#
+		WHERE
+					storenoticeunq=#storenoticeunq#
+
+	</update>
+
+
+
+
+
+
+</sqlMap>

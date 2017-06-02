@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookManagerSpace2">
+
+	<typeAlias alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<typeAlias alias="bookVO" type="TheBook.service.bookVO" />
+	<typeAlias alias="bookStockVO" type="TheBook.service.bookStockVO" />
+	<typeAlias alias="bookLevelVO" type="TheBook.service.bookLevelVO" />
+
+
+
+	<!-- 온라인 책 정보, 재고확인 -->
+	<select id="managerDAO.bookList" parameterClass="bookVO" resultClass="egovMap">
+		SELECT
+		bocode, bounq, boname, boauthor, bocompany, boprice, bopublish ,
+		bototal, bookstock.stockstock 
+		FROM
+		BOOK, BOOKSTOCK
+		WHERE
+		BOOK.bounq = BOOKSTOCK.STOCKBOOK AND STOCKSTOREUNQ='1'
+		<isNotNull property="name">
+			<isNotEmpty property="name">
+
+				AND $search$ LIKE '%' || #name# || '%'
+			</isNotEmpty>
+		</isNotNull>
+		ORDER BY
+		bounq desc
+	</select>
+<!-- managerDAO.infoModify -->
+
+
+
+	<!-- 책 정보 삭제 -->
+	<delete id="managerDAO.deleteBook" parameterClass="bookVO">
+		DELETE FROM
+				BOOK
+		WHERE
+				bounq = #bounq#
+	</delete>
+	
+	<!-- 책 재고정보 삭제 -->
+	<delete id="managerDAO.deletestock" parameterClass="bookStockVO">
+		DELETE FROM
+				BOOKSTOCK
+		WHERE
+				stockbook = #stockbook# AND stockstoreunq='1'
+	</delete>
+
+
+	<!-- 책 정보 등록 -->
+	<insert id="managerDAO.nbookInsert">
+
+		INSERT INTO 
+			BOOK
+				 ( bounq, bocode, boname, boauthor, botrans, bocompany,bopublish, boprice, boimg, 
+				 bopreview1, bopreview2, bopreview3, bopage, bosize, boinfo1, boinfo2, boregdate)
+		VALUES 
+				(#bounq#,#bocode#,#boname#,#boauthor#,#botrans#,#bocompany#,#bopublish#,
+				#boprice#,#boimg#, #bopreview1#, #bopreview2#, #bopreview3#,#bopage#,#bosize#,
+				#boinfo1#,#boinfo2#,sysdate)
+	</insert>
+	
+ 	<!-- 책 재고 등록 -->
+	<insert id="managerDAO.stockInsert" >
+
+		INSERT INTO 
+			BOOKSTOCK
+					(stockbook, stockstoreunq, stockstock)
+		VALUES 
+					(#stockbook#, 1, #stockstock#)
+		
+	</insert>
+	
+
+	<!-- 책 정보 수정폼 -->
+	<select id="managerDAO.bookinfoform" resultClass="bookVO">
+		SELECT
+					*
+		FROM
+					BOOK
+		WHERE bounq = #bounq#
+	</select>
+	
+	
+
+	
+	<!--infoModify/ stockModify  -->
+	
+
+ 
+	<!-- 책 수정 기능  -->
+	<update id="managerDAO.infoModify" parameterClass="bookVO">
+		UPDATE
+					BOOK
+		SET 
+			bocode=#bocode#, boname=#boname#, boauthor=#boauthor#, botrans=#botrans#, bocompany=#bocompany#,
+			bopublish=#bopublish#, boprice=#boprice#, bopage=#bopage#, bosize=#bosize#, boinfo1=#boinfo1#, boinfo2=#boinfo2#
+			
+		
+		WHERE
+					bounq=#bounq#
+		
+	</update>
+	
+	<!-- 책 재고 수정 기능  -->
+	<update id="managerDAO.stockModify" parameterClass="bookStockVO">
+		UPDATE
+					bookStock
+		SET 
+			
+			stockstock=#stockstock#
+		
+		WHERE
+					stockbook=#stockbook# AND STOCKSTOREUNQ='1'
+		
+	</update>
+	<!-- 컨트롤러에서 경우의수 만듬
+		메인 수정할때 수정안할때
+		메인 수정할때는 따로 if문 줘서 메소드 실행시킴 메인이미지 수정시키는거
+		메인 수정 안할경우는 나머지 vo애들만 수정 d업데이트
+		 -->
+	
+	
+	<!-- 책 메인이미지 수정 -->
+	<update id="managerDAO.fileModify" parameterClass="bookVO">
+		UPDATE
+					BOOK
+		SET 
+			 boimg=#boimg#
+		
+		WHERE
+					bounq=#bounq#
+		
+	</update>
+	
+	
+	<!-- 대분류 select -->
+	<!-- <select id="managerDAO.bigcode" resultClass="bookLevelVO">
+		SELECT	 substr(levelcode,1,2) kk, levelname 
+		FROM 	booklevel 
+		WHERE  substr(levelcode,1,2)=10 AND levelcode != 100000 ;
+	</select> -->
+	
+	
+	
+	
+	
+</sqlMap>

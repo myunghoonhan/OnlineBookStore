@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="bookStoreSpace">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="bookStoreVO" type="TheBook.service.bookStoreVO"/>
+	<typeAlias  alias="bookStoreNoticeVO" type="TheBook.service.bookStoreNoticeVO"/>	
+	
+	
+<!-- 	resultMap="bookStore" 로 쓸때만 필요
+		<resultMap id="bookStore" class="TheBook.service.bookStoreVO">
+		<result property="storeunq" column="storeunq" />
+		<result property="storename" column="storename" />
+		<result property="storetel" column="storetel" />
+		<result property="storefax" column="storefax" />
+		<result property="storehour" column="storehour" />
+		<result property="storeclose" column="storeclose" />
+		<result property="storeaddr" column="storeaddr" />
+		<result property="storeimg1" column="storeimg1" />
+		<result property="storeimg2" column="storeimg2" />
+		<result property="storeimg3" column="storeimg3" />
+	</resultMap> -->
+	
+	
+	
+	
+	<select id="storeDAO.selectStore" parameterClass="java.lang.String"	resultClass="bookStoreVO">
+		SELECT * FROM bookstore	WHERE storeunq = #storeunq#
+	
+	</select>
+	
+	<select id="storeDAO.selectStoreList" resultClass="egovMap">
+		select storeunq, storename from bookstore where storeunq between '2' and '5'
+	</select>
+	
+	   <select id="storeDAO.snoticeList" parameterClass="bookStoreNoticeVO" resultClass="egovMap">
+		SELECT * FROM (
+			SELECT ROWNUM rn, a.* FROM (
+				SELECT
+					storenoticeunq,
+					storenoticestore,
+					storenoticetitle,
+					storenoticecontent,
+					storenoticeroom,
+					storenoticeing,
+					storenoticeregdate
+				FROM
+					bookStoreNotice
+				WHERE
+                    storenoticestore = #storenoticestore#
+            ORDER BY
+               storenoticeunq DESC
+         ) a
+      )
+<!--       WHERE
+         rn BETWEEN #firstIndex# + 1 AND #lastIndex# -->
+   </select>
+   
+<!--    <select id="storeDAO.snoticeTot" resultClass="java.lang.Integer">
+      SELECT 
+         COUNT(*) tot 
+      FROM 
+         bookStoreNotice
+      WHERE
+         1 = 1
+         <isNotNull property="srchTxt">
+            <isNotEmpty property="srchTxt">
+               AND $srchCd$ LIKE '%' || #srchTxt# || '%'
+            </isNotEmpty>
+         </isNotNull>
+   </select> -->
+
+</sqlMap>
