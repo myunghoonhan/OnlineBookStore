@@ -134,7 +134,7 @@
 	<form:form commandName="orderVO" id="srcform" name="srcform" method="post">
 		<center>
 		<h1>배송관리</h1>
-			<br><br><br> 
+			<br><br><br>
 			<select name="searchtype" id="searchtype">
 				<option value="">선택해주세요</option>
 				<option value="buydetailbuyunq">구매번호</option>

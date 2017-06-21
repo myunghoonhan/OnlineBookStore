@@ -107,7 +107,7 @@
 		});
 	} */
 	
-	function fn_login(){
+/* 	function fn_login(){
 		
 		var form = {};
 		form.memid = document.frm_login.memid.value;
@@ -117,6 +117,30 @@
 			type: 'POST',
 			data: form,
 			url: "/bookLogin.do",
+			
+			success: function(data) {
+				
+				if(data.result == 0) {
+					location.reload(true);
+				} else {
+					alert("비밀번호가 일치하지 않습니다.");
+				}
+			},
+			error: function () {
+				alert("계정이 존재하지 않습니다.");
+			}
+		}); 
+	} */
+	
+	function fn_login(){
+		
+		var form = {"memid" : document.frm_login.memid.value, "mempw" : document.frm_login.mempwd.value};
+		
+		$.ajax({
+			type: 'POST',
+			url: "/bookLogin.do",
+			dataType: "json",
+			data: form,
 			
 			success: function(data) {
 				

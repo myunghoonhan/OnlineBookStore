@@ -24,17 +24,17 @@ public class bookLoginController{
 	
 	//=======================================================================로그인
 	@RequestMapping(value = "/bookLogin.do", method = RequestMethod.POST)
-	@ResponseBody public Map<String, String> bookLogin(HttpServletResponse response, HttpServletRequest request, bookMemberVO bookMemberVO) throws Exception {
+	@ResponseBody public Map<String, String> bookLogin(HttpServletResponse response, HttpServletRequest request) throws Exception {
 		
-		String mempwd = bookLoginService.getMemPwd(bookMemberVO.getMemid());
+		String mempwd = bookLoginService.getMemPwd(request.getParameter("memid"));
 		
 		Map<String, String> map = new HashMap<String, String>();
 		String result="";
 		
-		if (mempwd.equals(bookMemberVO.getMempwd())) {
+		if (mempwd.equals(request.getParameter("mempw"))) {
 			
 			HttpSession session = request.getSession(); //session객체 만들기
-			session.setAttribute("session_memid", bookMemberVO.getMemid());
+			session.setAttribute("session_memid", request.getParameter("memid"));
 			
 			result="0";
 			map.put("result", result);

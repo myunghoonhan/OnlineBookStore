@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"	pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -10,48 +10,62 @@
 <body>
 	<div id="map" style="width: 100%; height: 400px;"></div>
 	<script>
+		var HOME_PATH = window.HOME_PATH || '.';
 
-var HOME_PATH = window.HOME_PATH || '.';
+		var latlngs = 
+			[
+				new naver.maps.LatLng
+				(
+					"${selectVO.storewido }",
+					"${selectVO.storekyungdo }"
+				),
+			];
 
+		var map = new naver.maps.Map
+			('map', 
+				{
+					center : new naver.maps.LatLng
+							(	
+								"${selectVO.storewido }",
+								"${selectVO.storekyungdo }"
+							),
+					zoom : 11
+				}
+			);
 
-var latlngs = [
-	new naver.maps.LatLng("${selectVO.storewido }", "${selectVO.storekyungdo }"),
-];
+		var marker = new naver.maps.Marker
+			(
+				{
+					position : new naver.maps.LatLng
+					(
+						"${selectVO.storewido }",
+						"${selectVO.storekyungdo }"
+					),
+					map : map
+				}
+			);
 
+		function onMouseOver(e) {
+			var marker = e.overlay, seq = marker.get('seq');
 
-var map = new naver.maps.Map('map', {
-    center: new naver.maps.LatLng("${selectVO.storewido }", "${selectVO.storekyungdo }"),
-    zoom: 11
-});
+			marker.setIcon({
+				url : HOME_PATH + '/img/example/sp_pins_spot_v3_over.png',
+				size : new naver.maps.Size(24, 37),
+				anchor : new naver.maps.Point(12, 37),
+				origin : new naver.maps.Point(seq * 29, 50)
+			});
+		}
 
-var marker = new naver.maps.Marker({
-    position: new naver.maps.LatLng("${selectVO.storewido }", "${selectVO.storekyungdo }"),
-    map: map
-});
+		function onMouseOut(e) {
+			var marker = e.overlay, seq = marker.get('seq');
 
-function onMouseOver(e) {
-    var marker = e.overlay,
-        seq = marker.get('seq');
-
-    marker.setIcon({
-        url: HOME_PATH +'/img/example/sp_pins_spot_v3_over.png',
-        size: new naver.maps.Size(24, 37),
-        anchor: new naver.maps.Point(12, 37),
-        origin: new naver.maps.Point(seq * 29, 50)
-    });
-}
-
-function onMouseOut(e) {
-    var marker = e.overlay,
-        seq = marker.get('seq');
-
-    marker.setIcon({
-        url: HOME_PATH +'/img/example/sp_pins_spot_v3.png',
-        size: new naver.maps.Size(24, 37),
-        anchor: new naver.maps.Point(12, 37),
-        origin: new naver.maps.Point(seq * 29, 0)
-    });
-}
-</script>
+			marker.setIcon({
+				url : HOME_PATH + '/img/example/sp_pins_spot_v3.png',
+				size : new naver.maps.Size(24, 37),
+				anchor : new naver.maps.Point(12, 37),
+				origin : new naver.maps.Point(seq * 29, 0)
+			});
+		}
+	</script>
 </body>
 </html>

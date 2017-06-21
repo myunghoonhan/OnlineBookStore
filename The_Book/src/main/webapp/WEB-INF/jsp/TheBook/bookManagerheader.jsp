@@ -137,6 +137,7 @@
 					<li><a href="/bookManagerNotice.do">홈페이지 공지사항</a></li>
 				</ul>
 			</li>
+			<li><a href="/bookManagerDataVisualizing.do" id="current">데이터 출력</a></li>
 			<li id="li1"><a href="javascript:fn_test()">관리자 로그아웃</a></li>
 		</ul>
 	</div>
