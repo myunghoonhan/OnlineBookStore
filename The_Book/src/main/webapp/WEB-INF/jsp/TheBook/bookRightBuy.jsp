@@ -12,11 +12,99 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bookRightBuy.jsp</title>
 
 <script src="<c:url value="/js/jquery-1.12.4.js"/>"></script>
 <script src="<c:url value="/js/jquery-ui.js"/>"></script>
 
-<title></title>
+<!-- 아임포트 결제 라이브러리 -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
+<script type="text/javascript" src="https://service.iamport.kr/js/iamport.payment-1.1.2.js"></script>
+<script type="text/javascript">
+function Payment(){
+	
+	if($("#buyname").val() == ""){
+		alert('받으시는 분 성함을 입력해주세요.')
+		return;
+	}
+	if($("#buyphone1").val() == "" || $("#buyphone2").val() == "" || $("#buyphone3").val() == ""){
+		alert('휴대폰 번호를 입력해주세요.')
+		return;
+	}
+	if($("#buyzip").val() == "" || $("#buyaddr1").val() == "" || $("#buyaddr2").val() == ""){
+		alert('배송 주소를 입력해주세요.')
+		return;
+	}
+	
+	var bookunqs = [];
+	$("input[name='bookunq']").each(function(i){
+		bookunqs.push($(this).val());
+	});
+	
+	var booknames = [];
+	$("input[name='bookname']").each(function(i){
+		booknames.push($(this).val());
+	});
+	
+	var bookprices = [];
+	$("input[name='bookprice']").each(function(i){
+		bookprices.push($(this).val());
+	});
+	
+	var bookcnts = [];
+	$("input[name='bookcnt']").each(function(i){
+		bookcnts.push($(this).val());
+	});
+	
+	var bookimgs = [];
+	$("input[name='bookimg']").each(function(i){
+		bookimgs.push($(this).val());
+	});
+	
+	$("#bookunqs").val(bookunqs);
+	$("#booknames").val(booknames);
+	$("#bookprices").val(bookprices);
+	$("#bookcnts").val(bookcnts);
+	$("#bookimgs").val(bookimgs);
+	
+	var bookunqs= $("#bookunqs").val();
+	var booknames = $("#booknames").val();
+    var totalprice = $("#totalPrice").text();
+    var buyname = $("#buyname").val();
+    var buyphone = $("#buyphone1").val() + "-" + $("#buyphone2").val() + "-" + $("#buyphone3").val();
+    var buyaddr= $("#buyaddr1").val()+" "+$("#buyaddr2").val();
+    var buyzip = $("#buyzip").val();
+	
+	var IMP = window.IMP; // 생략가능
+	IMP.init('iamport'); // 'iamport' 대신 부여받은 "가맹점 식별코드"를 사용
+
+	IMP.request_pay({
+	    pg : 'inicis', // version 1.1.0부터 지원.
+	    pay_method : 'card',
+	    merchant_uid : bookunqs + new Date().getTime(),
+	    name : booknames,
+	    amount : totalprice,
+	    buyer_name : buyname,
+	    buyer_tel : buyphone,
+	    buyer_addr : buyaddr,
+	    buyer_postcode : buyzip,
+	    m_redirect_url : 'https://www.yourdomain.com/payments/complete'
+	}, function(rsp) {
+	    if ( rsp.success ) {
+	        var msg = '결제가 완료되었습니다.';
+	        msg += '고유ID : ' + rsp.imp_uid;
+	        msg += '상점 거래ID : ' + rsp.merchant_uid;
+	        msg += '결제 금액 : ' + rsp.paid_amount;
+	        msg += '카드 승인번호 : ' + rsp.apply_num;
+	    } else {
+	        var msg = '결제에 실패하였습니다.';
+	        msg += '에러내용 : ' + rsp.error_msg;
+	    }
+	    alert(msg);
+	});
+}
+</script>
+
 </head>
 
 <script type="text/javascript">
@@ -459,7 +547,8 @@
 				<div class="col-xs-12" align="right">
 					<a href="main.do">
 				    <button type="button" class="btn btn-default btn-lg" style="border-radius: 0px">쇼핑계속하기</button></a>
-				    <button type="button" class="btn btn-success btn-lg" style="border-radius: 0px" onclick="fn_checkStock()">결제하기</button>
+				    <button type="button" class="btn btn-success btn-lg" style="border-radius: 0px" onclick="fn_checkStock()">일반 결제하기</button>
+				    <button type="button" class="btn btn-success btn-lg" style="border-radius: 0px" onclick="Payment()">PG사 결제하기</button>
 		    	</div>
 	       	</div>
 	</form>
