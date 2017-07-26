@@ -33,8 +33,8 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/eGovFrameDev-3.5.1-64bit/workspace/The_Book/src/main/webapp/WEB-INF/lib/commons-dbcp-1.4.jar"/>
-	<classpathentry kind="lib" path="C:/eGovFrameDev-3.5.1-64bit/workspace/The_Book/src/main/webapp/WEB-INF/lib/commons-pool-1.4.jar"/>
-	<classpathentry kind="lib" path="C:/eGovFrameDev-3.5.1-64bit/workspace/The_Book/src/main/webapp/WEB-INF/lib/ojdbc6.jar"/>
+	<classpathentry kind="lib" path="D:/Desktop/쌍용/전자정부프레임워크/commons-dbcp-1.4.jar"/>
+	<classpathentry kind="lib" path="D:/Desktop/쌍용/전자정부프레임워크/commons-pool-1.4.jar"/>
+	<classpathentry kind="lib" path="D:/Desktop/쌍용/전자정부프레임워크/ojdbc6.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
