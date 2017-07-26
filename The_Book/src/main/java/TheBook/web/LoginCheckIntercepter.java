@@ -10,7 +10,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 @Service
 public class LoginCheckIntercepter extends HandlerInterceptorAdapter {
-	
+	//123
 	private static final Logger logger = Logger.getLogger(LoginCheckIntercepter.class);
 
 	@Override
