@@ -1,9 +1,19 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=utf-8"	pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="validator" uri="http://www.springmodules.org/tags/commons-validator"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<script src="<c:url value="/js/jquery-1.12.4.js"/>"></script>
+<script src="<c:url value="/js/jquery-ui.js"/>"></script>
+
 <title>Insert title here</title>
 </head>
 <style>
@@ -111,6 +121,24 @@
 	function fn_test(){
 		document.frm.submit();
 	}
+
+	function fn_DatabaseToXML() {
+		var form = {};
+
+		$.ajax({
+			type : 'POST',
+			url : "/bookManagerDatabaseToXML.do",
+			success : function(data){
+				/* console.log(data.jsonArray);
+				var json = JSON.stringify(data.jsonArray); */
+				console.log(data.json);
+				console.log(data.xml);
+			},
+			error : function() {
+				alert(" 오류발생 ");
+			}
+		});
+	}
 </script>
 <body>
 	<div class="menubar">
@@ -137,7 +165,8 @@
 					<li><a href="/bookManagerNotice.do">홈페이지 공지사항</a></li>
 				</ul>
 			</li>
-			<li><a href="/bookManagerDataVisualizing.do" id="current">데이터 출력</a></li>
+			<li><a href="/bookManagerDataVisualizing.do" id="current">JSON입출력</a></li>
+			<li><a href="javascript:fn_DatabaseToXML()" id="current">XML추출</a></li>
 			<li id="li1"><a href="javascript:fn_test()">관리자 로그아웃</a></li>
 		</ul>
 	</div>

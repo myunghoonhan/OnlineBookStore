@@ -56,6 +56,8 @@ public interface bookManagerService {
 
 	List<?> bigcode(bookLevelVO vo);
 
+	List<?> selectBookList();
+
 
 
 	

@@ -102,5 +102,12 @@
 		group by 
 			buydetailcondition
 	</select>
+	
+	<select id="managerDAO.selectBookList" resultClass="egovMap">
+		select 
+			*
+		from 
+			book
+	</select>
 
 </sqlMap>

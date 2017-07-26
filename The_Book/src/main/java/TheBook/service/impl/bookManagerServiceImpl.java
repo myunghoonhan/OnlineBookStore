@@ -182,6 +182,11 @@ public class bookManagerServiceImpl extends EgovAbstractServiceImpl implements b
 		return managerDAO.bigcode(vo);
 	}
 
+	@Override
+	public List<?> selectBookList() {
+		return managerDAO.selectBookList();
+	}
+
 	
 
 
