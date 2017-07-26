@@ -10,7 +10,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Insert title here</title>
+<title>bookManagerOrder</title>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
@@ -162,7 +162,7 @@
 					<th id="th10">배송여부 선택</th>
 					<th>확인</th>
 				</tr>
-
+				
 				<c:forEach var="order" items="${orderList}" varStatus="status">
 				
 					<tr>

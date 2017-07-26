@@ -73,7 +73,9 @@ tr {
 		function receivedText(e) {
 
 			lines = e.target.result;
+			console.log(lines);
 			var jsonArray = JSON.parse(lines);
+			console.log(jsonArray);
 			var objId = "tt";
 			var table = createTable(jsonArray, objId);
 

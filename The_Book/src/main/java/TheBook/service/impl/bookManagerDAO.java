@@ -154,6 +154,11 @@ public class bookManagerDAO extends EgovAbstractDAO{
 	}
 
 
+	public List<?> selectBookList() {
+		return list("managerDAO.selectBookList");
+	}
+
+
 	
 	
 	

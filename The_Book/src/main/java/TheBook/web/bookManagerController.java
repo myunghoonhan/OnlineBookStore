@@ -1,6 +1,8 @@
 package TheBook.web;
 
+import java.beans.XMLDecoder;
 import java.io.File;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +14,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.sf.json.JSONArray;
+import net.sf.json.xml.XMLSerializer;
+
+import org.codehaus.jackson.map.util.JSONPObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,10 +27,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.ibatis.sqlmap.engine.mapping.result.XmlList;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.XStream11NameCoder;
+
 import TheBook.service.bookBuyDetailVO;
 import TheBook.service.bookBuyVO;
 import TheBook.service.bookLevelVO;
 import TheBook.service.bookManagerService;
+import TheBook.service.bookMemberVO;
 import TheBook.service.bookNoticeVO;
 import TheBook.service.bookQnaVO;
 import TheBook.service.bookStockVO;
@@ -49,20 +60,16 @@ public class bookManagerController {
 
 	// 배송관리 리스트
 	@RequestMapping(value = "/bookManagerOrder.do")
-	public String bookManagerOrder(@ModelAttribute("orderVO") bookBuyVO vo,
-			ModelMap model, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	public String bookManagerOrder(@ModelAttribute("orderVO") bookBuyVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
 			return null;
 		} else {
 			List<?> orderList = managerService.bookManagerOrder(vo);
-
 			model.addAttribute("orderList", orderList); // 만들어진 리스트들을 가져옴
 
 			return "TheBook/bookManagerOrder";
@@ -72,12 +79,9 @@ public class bookManagerController {
 	// 배송관리 업데이트
 	@RequestMapping(value = "/bookMgcdupdate.do")
 	@ResponseBody
-	public Map<String, Object> updateCondition(HttpServletRequest request,
-			HttpServletResponse response, bookBuyVO bvo, bookBuyDetailVO vo)
-			throws Exception {
+	public Map<String, Object> updateCondition(HttpServletRequest request, HttpServletResponse response, bookBuyVO bvo, bookBuyDetailVO vo) throws Exception {
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -98,13 +102,10 @@ public class bookManagerController {
 
 	// 고객 QnA 리스트
 	@RequestMapping(value = "/bookManagerQnA.do")
-	public String bookManagerQnA(@ModelAttribute("qnaVO") bookQnaVO vo,
-			ModelMap model, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	public String bookManagerQnA(@ModelAttribute("qnaVO") bookQnaVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -122,12 +123,10 @@ public class bookManagerController {
 	// 고객 QnA 답변 업데이트
 	@RequestMapping(value = "/bookQnAupdate.do")
 	@ResponseBody
-	public Map<String, Object> updateQnA(HttpServletRequest request,
-			HttpServletResponse response, bookQnaVO vo) throws Exception {
+	public Map<String, Object> updateQnA(HttpServletRequest request, HttpServletResponse response, bookQnaVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -146,13 +145,10 @@ public class bookManagerController {
 
 	// 고객 QnA 게시글 삭제
 	@RequestMapping(value = "/bookQnAdelete.do")
-	public @ResponseBody Map<String, Object> deleteQnA(
-			HttpServletRequest request, HttpServletResponse response,
-			bookQnaVO vo) throws Exception {
+	public @ResponseBody Map<String, Object> deleteQnA(HttpServletRequest request, HttpServletResponse response, bookQnaVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -179,12 +175,10 @@ public class bookManagerController {
 	// 홈페이지 공지사항 등록
 	@RequestMapping(value = "/bookAddNotice.do")
 	@ResponseBody
-	public Map<String, Object> insertNotice(HttpServletRequest request,
-			HttpServletResponse response, bookNoticeVO vo) throws Exception {
+	public Map<String, Object> insertNotice(HttpServletRequest request, HttpServletResponse response, bookNoticeVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -209,13 +203,10 @@ public class bookManagerController {
 
 	// 홈페이지 공지사항 리스트
 	@RequestMapping(value = "/bookManagerNotice.do")
-	public String bookManagerNotice(@ModelAttribute("notiVO") bookNoticeVO vo,
-			ModelMap model, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	public String bookManagerNotice(@ModelAttribute("notiVO") bookNoticeVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -232,13 +223,10 @@ public class bookManagerController {
 
 	// 공지사항 검색
 	@RequestMapping(value = "/bookNoticesearch.do")
-	public String bookNoticesearch(@ModelAttribute("notiVO") bookNoticeVO vo,
-			ModelMap model, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	public String bookNoticesearch(@ModelAttribute("notiVO") bookNoticeVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -255,13 +243,10 @@ public class bookManagerController {
 
 	// 관리자 수정페이지 디테일
 	@RequestMapping(value = "/bookModifyform.do")
-	public String bookModifyform(bookNoticeVO vo, ModelMap model,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	public String bookModifyform(bookNoticeVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -279,13 +264,10 @@ public class bookManagerController {
 
 	// 관리자 공지사항 수정
 	@RequestMapping(value = "/booknotiModify.do")
-	public @ResponseBody Map<String, Object> modifynotice(
-			HttpServletRequest request, HttpServletResponse response,
-			bookNoticeVO vo) throws Exception {
+	public @ResponseBody Map<String, Object> modifynotice(HttpServletRequest request, HttpServletResponse response, bookNoticeVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -304,13 +286,10 @@ public class bookManagerController {
 
 	// 관리자 공지사항 삭제
 	@RequestMapping(value = "/booknotiDelete.do")
-	public @ResponseBody Map<String, Object> deletenotice(
-			HttpServletRequest request, HttpServletResponse response,
-			bookNoticeVO vo) throws Exception {
+	public @ResponseBody Map<String, Object> deletenotice(HttpServletRequest request, HttpServletResponse response, bookNoticeVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -329,12 +308,10 @@ public class bookManagerController {
 
 	// 영업점 공지사항 등록페이지 보이기
 	@RequestMapping(value = "/bookAddstorenotform.do")
-	public String bookAddstorenoti(HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	public String bookAddstorenoti(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -348,13 +325,10 @@ public class bookManagerController {
 	// 영업점 공지사항 등록
 	@RequestMapping(value = "/bookAddstnotice.do")
 	@ResponseBody
-	public Map<String, Object> insertstNotice(HttpServletRequest request,
-			HttpServletResponse response, bookStoreNoticeVO vo)
-			throws Exception {
+	public Map<String, Object> insertstNotice(HttpServletRequest request, HttpServletResponse response, bookStoreNoticeVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -377,14 +351,10 @@ public class bookManagerController {
 
 	// 영업점 공지사항 리스트
 	@RequestMapping(value = "/bookMangerStore.do")
-	public String bookMangerStore(
-			@ModelAttribute("stnotiVO") bookStoreNoticeVO vo, ModelMap model,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	public String bookMangerStore(@ModelAttribute("stnotiVO") bookStoreNoticeVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -400,13 +370,10 @@ public class bookManagerController {
 
 	// 영업점 공지사항 수정 폼
 	@RequestMapping(value = "/bookstModifyform.do")
-	public String bookstModifyform(bookStoreNoticeVO vo, ModelMap model,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	public String bookstModifyform(bookStoreNoticeVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -423,13 +390,10 @@ public class bookManagerController {
 
 	// 영업점 공지사항 수정
 	@RequestMapping(value = "/bookstModify.do")
-	public @ResponseBody Map<String, Object> modifystnotice(
-			HttpServletRequest request, HttpServletResponse response,
-			bookStoreNoticeVO vo) throws Exception {
+	public @ResponseBody Map<String, Object> modifystnotice(HttpServletRequest request, HttpServletResponse response, bookStoreNoticeVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -448,13 +412,10 @@ public class bookManagerController {
 
 	// 영업점 공지사항 삭제
 	@RequestMapping(value = "/bookstnotiDelete.do")
-	public @ResponseBody Map<String, Object> deletestNotice(
-			HttpServletRequest request, HttpServletResponse response,
-			bookStoreNoticeVO vo) throws Exception {
+	public @ResponseBody Map<String, Object> deletestNotice(HttpServletRequest request, HttpServletResponse response, bookStoreNoticeVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -474,13 +435,10 @@ public class bookManagerController {
 
 	// 책 리스트
 	@RequestMapping(value = "/bookList.do")
-	public String bookList(@ModelAttribute("bookVO") bookVO vo, ModelMap model,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	public String bookList(@ModelAttribute("bookVO") bookVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -496,13 +454,10 @@ public class bookManagerController {
 
 	// 책 정보 삭제
 	@RequestMapping(value = "/bookDelete.do")
-	public @ResponseBody Map<String, Object> deleteBook(
-			HttpServletRequest request, HttpServletResponse response,
-			bookVO vo, bookStockVO svo) throws Exception {
+	public @ResponseBody Map<String, Object> deleteBook(HttpServletRequest request, HttpServletResponse response, bookVO vo, bookStockVO svo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -524,12 +479,10 @@ public class bookManagerController {
 
 	// 책 등록 페이지
 	@RequestMapping(value = "/bookAddform.do")
-	public String bookAddform(HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	public String bookAddform(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -542,14 +495,10 @@ public class bookManagerController {
 	// 새책 등록(파일 업로드)
 	@RequestMapping(value = "/nbookInsert.do")
 	@ResponseBody
-	public Map<String, Object> nbookInsert(
-			final MultipartHttpServletRequest multiRequest,
-			HttpServletRequest request, HttpServletResponse response, bookVO vo)
-			throws Exception {
+	public Map<String, Object> nbookInsert(final MultipartHttpServletRequest multiRequest, HttpServletRequest request, HttpServletResponse response, bookVO vo) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -573,8 +522,7 @@ public class bookManagerController {
 			}
 
 			// Map인 files의 저장 내용을 가져오기 위해 Iterator 형태로 형변환
-			Iterator<Entry<String, MultipartFile>> itr = files.entrySet()
-					.iterator();
+			Iterator<Entry<String, MultipartFile>> itr = files.entrySet().iterator();
 
 			// itr의 내용을 하나씩 가져와 upload 파일에 저장한다.
 
@@ -628,9 +576,9 @@ public class bookManagerController {
 			String result = "";
 			String result1 = "";
 
-			String bounq = "c"
-					+ Integer.toString(bookUnqseq.getNextIntegerId()); // 분류번호 앞
-																		// c붙여줌
+			String bounq = "c" + Integer.toString(bookUnqseq.getNextIntegerId()); // 분류번호
+																					// 앞
+																					// c붙여줌
 			vo.setBounq(bounq);
 			svo.setStockbook(bounq);
 
@@ -652,13 +600,10 @@ public class bookManagerController {
 
 	// 책 수정페이지
 	@RequestMapping(value = "/bookinfoform.do")
-	public String bookinfoform(bookVO vo, bookStockVO svo, ModelMap model,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	public String bookinfoform(bookVO vo, bookStockVO svo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -678,13 +623,9 @@ public class bookManagerController {
 	// 책 정보 수정
 	@RequestMapping(value = "/bookinfoModify.do")
 	@ResponseBody
-	public Map<String, Object> infoModify(
-			final MultipartHttpServletRequest multiRequest,
-			HttpServletRequest request, HttpServletResponse response, bookVO vo)
-			throws Exception {
+	public Map<String, Object> infoModify(final MultipartHttpServletRequest multiRequest, HttpServletRequest request, HttpServletResponse response, bookVO vo) throws Exception {
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -721,13 +662,11 @@ public class bookManagerController {
 			}
 
 			// Map인 files의 저장 내용을 가져오기 위해 Iterator 형태로 형변환
-			Iterator<Entry<String, MultipartFile>> itr = files.entrySet()
-					.iterator();
+			Iterator<Entry<String, MultipartFile>> itr = files.entrySet().iterator();
 
 			Map<String, Object> map = new HashMap<String, Object>();
 
-			System.out.println("메인이미지 값 뭐야 ======================"
-					+ vo.getBoimg());
+			System.out.println("메인이미지 값 뭐야 ======================" + vo.getBoimg());
 
 			if (vo.getBoimg() == null) { // 메인 이미지 업로드 안할경우
 
@@ -759,15 +698,13 @@ public class bookManagerController {
 					file = entry.getValue();
 					if (!"".equals(file.getOriginalFilename())) {
 
-						filePath = uploadPath + "\\"
-								+ file.getOriginalFilename();
+						filePath = uploadPath + "\\" + file.getOriginalFilename();
 
 						// 업로드 정보 형성 ex: c:\\upload\a.jpg
 						System.out.println("fileupload중간ㅜ==]=========");
 
 						// name1[] = file.getOriginalFilename();
-						System.out.println("name : "
-								+ file.getOriginalFilename());
+						System.out.println("name : " + file.getOriginalFilename());
 						// 바깥에서 사용하려면 String을 선언 해준후 while문안에 넣어주고 그것을 밖에서 호출해서
 						// db에 insert 해준다
 
@@ -815,13 +752,10 @@ public class bookManagerController {
 
 	// 책 수정페이지
 	@RequestMapping(value = "/bookselectTest.do")
-	public String bookselectTest(bookLevelVO vo, ModelMap model,
-			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+	public String bookselectTest(bookLevelVO vo, ModelMap model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -838,12 +772,10 @@ public class bookManagerController {
 
 	// 관리자 메인페이지
 	@RequestMapping(value = "/bookManagerheader.do")
-	public String bookManagerheader(HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	public String bookManagerheader(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -855,12 +787,10 @@ public class bookManagerController {
 
 	// 관리자 로그아웃
 	@RequestMapping(value = "/bookLogOutManager.do", method = RequestMethod.POST)
-	public String bookLogOutManager(HttpServletResponse response,
-			HttpServletRequest request) throws Exception {
+	public String bookLogOutManager(HttpServletResponse response, HttpServletRequest request) throws Exception {
 
 		// session에 할당된 id 받아오기
-		String memid = (String) request.getSession().getAttribute(
-				"session_memid");
+		String memid = (String) request.getSession().getAttribute("session_memid");
 
 		if (memid.equals("master") == false || memid == null) {
 			response.sendRedirect("/main.do");
@@ -872,11 +802,31 @@ public class bookManagerController {
 			return "redirect:/main.do";
 		}
 	}
-	
-	//데이터 출력
-	@RequestMapping(value="/bookManagerDataVisualizing.do")
+
+	// JSON 출력
+	@RequestMapping(value = "/bookManagerDataVisualizing.do")
 	public String bookManagerDataVisualizing() {
 		return "TheBook/bookManagerDataVisualizing";
+	}
+	
+	// JSON, XML 출력
+	@RequestMapping(value = "/bookManagerDatabaseToXML.do", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> bookManagerDatabaseToXML(HttpServletResponse response, HttpServletRequest request, bookMemberVO bookMemberVO) throws Exception {
+
+		List<?> list = managerService.selectBookList();
+		
+		JSONArray json = new JSONArray();
+		json = json.fromObject(list); //list -> JSON문법 적용한 Object
+		
+		XStream x = new XStream();
+		String xml = x.toXML(list); //list -> XML문법 적용한 String
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("json", json);
+		map.put("xml", xml);
+		
+		return map;
 	}
 
 }
